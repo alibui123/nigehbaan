@@ -1,0 +1,5 @@
+const fs = require('fs')
+const code = fs.readFileSync('scratch/pmd-river-state-main.js', 'utf8')
+const statuses = [...code.matchAll(/status:\s*"([^"]+)"/g)].map((m) => m[1])
+console.log([...new Set(statuses)])
+console.log('count', statuses.length)

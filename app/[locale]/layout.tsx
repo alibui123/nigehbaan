@@ -3,6 +3,7 @@ import { Inter, IBM_Plex_Mono } from "next/font/google";
 import "../globals.css";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
+import LanguageToggle from './LanguageToggle';
 
 const inter = Inter({
   variable: "--font-sans",
@@ -35,6 +36,7 @@ export default async function RootLayout({
       <body className={`${inter.variable} ${plexMono.variable} antialiased`}>
         <NextIntlClientProvider messages={messages}>
           {children}
+          <LanguageToggle currentLocale={locale} />
         </NextIntlClientProvider>
       </body>
     </html>

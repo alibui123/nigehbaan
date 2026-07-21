@@ -1,4 +1,5 @@
 import { signIn } from './actions'
+import LoginForm from './LoginForm'
 
 export default async function LoginPage({
   searchParams,
@@ -39,56 +40,7 @@ export default async function LoginPage({
           </p>
         </div>
 
-        <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
-          <form action={signIn} className="space-y-4">
-            <div>
-              <label
-                htmlFor="email"
-                className="mb-1.5 block text-sm font-medium text-[var(--color-ink)]"
-              >
-                Email
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                className="w-full rounded-md border border-[var(--color-border)] px-3 py-2 text-sm outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
-                placeholder="you@nigheban.gov.pk"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="password"
-                className="mb-1.5 block text-sm font-medium text-[var(--color-ink)]"
-              >
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                className="w-full rounded-md border border-[var(--color-border)] px-3 py-2 text-sm outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
-                placeholder="••••••••"
-              />
-            </div>
-
-            {error && (
-              <p className="rounded-md bg-[var(--color-emergency)]/10 px-3 py-2 text-sm text-[var(--color-emergency)]">
-                {error}
-              </p>
-            )}
-
-            <button
-              type="submit"
-              className="w-full rounded-md bg-[var(--color-primary)] py-2.5 text-sm font-medium text-white transition-colors hover:bg-[var(--color-primary-hover)]"
-            >
-              Sign in
-            </button>
-          </form>
-        </div>
+        <LoginForm error={error} action={signIn} />
 
         <p className="mt-6 text-center font-mono text-xs text-[var(--color-ink)]/40">
           KP &amp; GB Provincial Duty Console

@@ -1,0 +1,2203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, shrink-to-fit=no">
+    <meta name="keywords" content="FFD, FFD Lahore, Flood Forecasting Division, flood monitoring Pakistan, real-time river data, river flows, river discharge Pakistan, dam levels, flood bulletin, weather warning Pakistan, PMD flood, Indus river flood, Tarbela dam level, Mangla dam level, Chenab river, Jhelum river">
+    <meta name="description" content="Official website of Flood Forecasting Division (FFD) Lahore, Pakistan Meteorological Department. Live river flows, flood bulletins, weather warnings, and early warning system.">
+    <meta name="csrf-token" content="HtZ7C0ifl0IwW4d4yVoQ4WpRRbclQUTT1TCvkB2P">
+
+    <title>Flood Forecasting Division — Real-Time Flood Monitoring — FFD Lahore</title>
+
+    <link rel="icon" href="https://ffd.pmd.gov.pk/favicon.svg" type="image/svg+xml">
+    <link rel="shortcut icon" href="https://ffd.pmd.gov.pk/favicon.svg" type="image/svg+xml">
+
+    
+    <link rel="canonical" href="https://ffd.pmd.gov.pk/home">
+
+    
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Flood Forecasting Division — FFD Lahore">
+    <meta property="og:title" content="Flood Forecasting Division — Real-Time Flood Monitoring — FFD Lahore">
+    <meta property="og:description" content="Official website of Flood Forecasting Division (FFD) Lahore, Pakistan Meteorological Department. Live river flows, flood bulletins, weather warnings, and early warning system.">
+    <meta property="og:url" content="https://ffd.pmd.gov.pk/home">
+    <meta property="og:image" content="https://ffd.pmd.gov.pk/images/ffd-og-card.svg">
+    <meta property="og:locale" content="en_PK">
+
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Flood Forecasting Division — Real-Time Flood Monitoring — FFD Lahore">
+    <meta name="twitter:description" content="Official website of Flood Forecasting Division (FFD) Lahore, Pakistan Meteorological Department. Live river flows, flood bulletins, weather warnings, and early warning system.">
+    <meta name="twitter:image" content="https://ffd.pmd.gov.pk/images/ffd-og-card.svg">
+
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 4 -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+
+    <style>
+        :root {
+            --ffd-blue:   #0f2942;
+            --ffd-blue-light: #1a4971;
+            --ffd-accent: #00b4d8;
+            --ffd-green:  #10b981;
+            --ffd-gold:   #f59e0b;
+        }
+
+        body { font-family: 'Nunito', sans-serif; background: #f8f9fa; }
+        .site-logo-text .org-name { font-family: 'Inter', 'Nunito', sans-serif; }
+
+        /* ── Topbar (thin info strip) ────────────────────────────────── */
+        .site-topbar {
+            background: linear-gradient(90deg, #0f2942 0%, #1a4971 100%);
+            color: rgba(255,255,255,.85);
+            font-size: .78rem;
+            padding: 8px 0;
+            letter-spacing: .02em;
+        }
+        .site-topbar a {
+            color: rgba(255,255,255,.85);
+            text-decoration: none;
+            transition: all .2s ease;
+            padding: 4px 10px;
+            border-radius: 4px;
+        }
+        .site-topbar a:hover {
+            color: #fff;
+            background: rgba(255,255,255,.1);
+        }
+        .site-topbar .topbar-left  { display: flex; align-items: center; gap: 8px; }
+        .site-topbar .topbar-right { display: flex; align-items: center; gap: 6px; }
+        .site-topbar i { font-size: .82rem; }
+        .site-topbar .badge-live {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: #fff;
+            font-size: .65rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            animation: pulse-live 2s infinite;
+        }
+        @keyframes pulse-live {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .7; }
+        }
+
+        /* ── Main header ─────────────────────────────────────────────── */
+        .site-header {
+            background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 50%, #e0f2fe 100%);
+            padding: 0;
+            border-bottom: none;
+            position: relative;
+            overflow: hidden;
+        }
+        .site-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 40%;
+            height: 100%;
+            background: linear-gradient(135deg, transparent 0%, rgba(0, 180, 216, 0.05) 50%, rgba(16, 185, 129, 0.08) 100%);
+            pointer-events: none;
+        }
+        .site-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--ffd-accent), var(--ffd-green), var(--ffd-gold));
+        }
+        .site-header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 20px 0;
+            position: relative;
+            z-index: 1;
+        }
+        .site-logo-block {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            text-decoration: none;
+            transition: transform .2s ease;
+        }
+        .site-logo-block:hover {
+            transform: translateY(-2px);
+            text-decoration: none;
+        }
+        .site-logo-block img {
+            height: 72px;
+            width: auto;
+            flex-shrink: 0;
+            filter: drop-shadow(0 4px 12px rgba(0,0,0,.1));
+            transition: transform .3s ease;
+        }
+        .site-logo-block:hover img {
+            transform: scale(1.05);
+        }
+        .site-logo-text .org-name {
+            font-size: 1.4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #0f2942 0%, #1a4971 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+            letter-spacing: -.02em;
+        }
+        .site-logo-text .org-parent {
+            font-size: .9rem;
+            font-weight: 700;
+            color: #475569;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .site-logo-text .org-parent::before {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--ffd-accent), var(--ffd-green));
+            border-radius: 2px;
+        }
+        .site-logo-text .org-ministry {
+            font-size: .8rem;
+            color: #64748b;
+            margin-top: 3px;
+            font-weight: 500;
+        }
+
+        /* Header stats/info cards */
+        .header-info-cards {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 12px 18px;
+            box-shadow: 0 2px 12px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.04);
+            border: 1px solid rgba(0,0,0,.04);
+            text-align: center;
+            min-width: 100px;
+            transition: all .2s ease;
+        }
+        .header-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,.1);
+        }
+        .header-card .card-icon {
+            font-size: 1.5rem;
+            margin-bottom: 4px;
+        }
+        .header-card .card-label {
+            font-size: .7rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+        .header-card .card-value {
+            font-size: .85rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .header-card.card-weather .card-icon { color: var(--ffd-gold); }
+        .header-card.card-rivers .card-icon { color: var(--ffd-accent); }
+        .header-card.card-alerts .card-icon { color: #ef4444; }
+
+        .header-card.card-rain-watch {
+            background: linear-gradient(135deg, #0f2942 0%, #1a4971 100%);
+            border-color: transparent;
+            min-width: 220px;
+            max-width: 300px;
+            text-decoration: none !important;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-align: left;
+            padding: 12px 16px;
+        }
+        .header-card.card-rain-watch:hover {
+            background: linear-gradient(135deg, #1a4971 0%, #1a73e8 100%);
+        }
+        .header-card.card-rain-watch .card-icon {
+            font-size: 1.8rem;
+            color: var(--ffd-accent);
+            flex-shrink: 0;
+            margin-bottom: 0;
+        }
+        .header-card.card-rain-watch .card-label { color: rgba(255,255,255,.65); font-size: .75rem; }
+        .header-card.card-rain-watch .card-value { color: #fff; font-size: .78rem; font-weight: 600; line-height: 1.35; }
+        .header-card.card-rain-watch .card-arrow {
+            font-size: .85rem;
+            color: rgba(255,255,255,.4);
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+
+        /* Responsive: stack on small screens */
+        @media (max-width: 991px) {
+            .header-info-cards { display: none; }
+        }
+        @media (max-width: 575px) {
+            .site-header-inner {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                padding: 16px 0;
+            }
+            .site-logo-text .org-name { font-size: 1.1rem; }
+            .site-logo-block img { height: 54px; }
+            .site-logo-text .org-parent { font-size: .8rem; }
+            .site-logo-text .org-parent::before { display: none; }
+        }
+        @media (max-width: 767px) {
+            .site-topbar .topbar-right { display: none; }
+        }
+
+        /* ── Navbar ──────────────────────────────────────────────────── */
+        #site-nav {
+            position: sticky;
+            top: 0;
+            z-index: 1030;
+            background: #0f2942;
+            border-bottom: 3px solid var(--ffd-accent);
+            box-shadow: 0 2px 16px rgba(0,0,0,.25);
+        }
+        .site-nav-inner {
+            display: flex;
+            align-items: stretch;
+            height: 48px;
+        }
+        /* Brand shown on mobile */
+        .site-nav-brand {
+            display: none;
+            align-items: center;
+            color: #fff;
+            font-weight: 700;
+            font-size: .9rem;
+            padding: 0 16px;
+            text-decoration: none;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .site-nav-brand:hover { color: var(--ffd-accent); text-decoration: none; }
+
+        /* Main links row */
+        .site-nav-links {
+            display: flex;
+            align-items: stretch;
+            flex: 1;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        .site-nav-links > li {
+            display: flex;
+            align-items: stretch;
+            position: relative;
+        }
+        .site-nav-links > li > a {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 0 15px;
+            color: rgba(255,255,255,.85);
+            font-size: .82rem;
+            font-weight: 600;
+            text-decoration: none;
+            white-space: nowrap;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -3px;
+            transition: color .15s, border-color .15s, background .15s;
+        }
+        .site-nav-links > li > a:hover,
+        .site-nav-links > li.active > a {
+            color: #fff;
+            border-bottom-color: var(--ffd-accent);
+            background: rgba(255,255,255,.07);
+            text-decoration: none;
+        }
+        .site-nav-links > li > a i { font-size: .8rem; opacity: .8; }
+
+        /* Dropdown */
+        .site-nav-links > li.has-drop > a::after {
+            content: '';
+            display: inline-block;
+            width: 0; height: 0;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-top: 4px solid rgba(255,255,255,.6);
+            margin-left: 4px;
+            transition: transform .15s;
+        }
+        .site-nav-links > li.has-drop:hover > a::after {
+            transform: rotate(180deg);
+        }
+        .site-nav-drop {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: #fff;
+            border-radius: 0 0 10px 10px;
+            min-width: 220px;
+            box-shadow: 0 8px 32px rgba(0,0,0,.18);
+            padding: 6px;
+            z-index: 200;
+        }
+        .site-nav-links > li.has-drop:hover .site-nav-drop { display: block; }
+        .site-nav-drop a {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 12px;
+            color: #1e293b;
+            font-size: .82rem;
+            font-weight: 600;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: background .12s, color .12s;
+        }
+        .site-nav-drop a:hover { background: #f0f9ff; color: var(--ffd-blue); text-decoration: none; }
+        .site-nav-drop a i { color: var(--ffd-accent); width: 16px; font-size: .8rem; }
+        .site-nav-drop .drop-divider {
+            height: 1px; background: #e2e8f0; margin: 5px 6px;
+        }
+        .site-nav-drop .drop-header {
+            padding: 6px 12px 3px;
+            font-size: .7rem;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+        }
+
+        /* Right auth section */
+        .site-nav-right {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 0 4px;
+            flex-shrink: 0;
+        }
+        .site-nav-right .snr-btn {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: .78rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all .15s;
+            white-space: nowrap;
+        }
+        .site-nav-right .snr-btn-cms {
+            background: linear-gradient(135deg, var(--ffd-accent), var(--ffd-green));
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(0,180,216,.3);
+        }
+        .site-nav-right .snr-btn-cms:hover {
+            color: #fff; text-decoration: none;
+            box-shadow: 0 4px 14px rgba(0,180,216,.45);
+            transform: translateY(-1px);
+        }
+        .site-nav-right .snr-btn-login {
+            background: rgba(255,255,255,.12);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,.2);
+        }
+        .site-nav-right .snr-btn-login:hover {
+            background: rgba(255,255,255,.2); color: #fff; text-decoration: none;
+        }
+
+        /* User dropdown trigger */
+        .site-nav-right .snr-user {
+            position: relative;
+        }
+        .snr-user-btn {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 0 10px;
+            height: 48px;
+            color: rgba(255,255,255,.9);
+            font-size: .8rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            background: none;
+            white-space: nowrap;
+            transition: color .15s, background .15s;
+        }
+        .snr-user-btn:hover { color: #fff; background: rgba(255,255,255,.07); }
+        .snr-user-btn .avatar {
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.18);
+            display: flex; align-items: center; justify-content: center;
+            font-size: .78rem; font-weight: 700; color: #fff;
+            flex-shrink: 0;
+        }
+        .snr-user-drop {
+            display: none;
+            position: absolute;
+            top: 100%; right: 0;
+            background: #fff;
+            border-radius: 0 0 10px 10px;
+            min-width: 230px;
+            box-shadow: 0 8px 32px rgba(0,0,0,.18);
+            padding: 6px;
+            z-index: 200;
+        }
+        .snr-user:hover .snr-user-drop { display: block; }
+        .snr-user-drop .drop-profile {
+            padding: 10px 12px 8px;
+            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 4px;
+        }
+        .snr-user-drop .drop-profile .dp-name { font-size: .85rem; font-weight: 700; color: #1e293b; }
+        .snr-user-drop .drop-profile .dp-email { font-size: .73rem; color: #64748b; }
+        .snr-user-drop .drop-profile .dp-role {
+            display: inline-block;
+            margin-top: 4px;
+            font-size: .68rem; font-weight: 700;
+            background: #e0f2fe; color: #0369a1;
+            padding: 2px 8px; border-radius: 20px;
+        }
+        .snr-user-drop a, .snr-user-drop button {
+            display: flex; align-items: center; gap: 8px;
+            width: 100%; padding: 9px 12px;
+            color: #1e293b; font-size: .82rem; font-weight: 600;
+            border-radius: 6px; text-decoration: none;
+            background: none; border: none; cursor: pointer; text-align: left;
+            transition: background .12s, color .12s;
+        }
+        .snr-user-drop a:hover, .snr-user-drop button:hover {
+            background: #f0f9ff; color: var(--ffd-blue); text-decoration: none;
+        }
+        .snr-user-drop .drop-divider { height:1px; background:#e2e8f0; margin:5px 6px; }
+        .snr-user-drop i { color: var(--ffd-accent); width: 16px; font-size: .8rem; }
+        .snr-user-drop .sign-out-btn i { color: #ef4444; }
+        .snr-user-drop .sign-out-btn { color: #dc2626; }
+        .snr-user-drop .sign-out-btn:hover { background: #fef2f2; color: #dc2626; }
+
+        /* Mobile toggle */
+        .site-nav-toggle {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 44px; height: 48px;
+            background: none; border: none;
+            color: rgba(255,255,255,.9);
+            font-size: 1.3rem;
+            cursor: pointer;
+            flex-shrink: 0;
+            margin-left: auto;
+        }
+        .site-nav-toggle:hover { color: #fff; background: rgba(255,255,255,.08); }
+
+        /* Mobile menu panel */
+        #mobile-nav {
+            display: none;
+            background: #0d2338;
+            border-top: 1px solid rgba(255,255,255,.1);
+        }
+        #mobile-nav a, #mobile-nav button {
+            display: block;
+            padding: 11px 20px;
+            color: rgba(255,255,255,.85);
+            font-size: .85rem; font-weight: 600;
+            text-decoration: none;
+            border: none; background: none; width: 100%; text-align: left;
+            transition: background .12s, color .12s;
+        }
+        #mobile-nav a:hover, #mobile-nav button:hover {
+            background: rgba(255,255,255,.07); color: #fff; text-decoration: none;
+        }
+        #mobile-nav .mob-section {
+            border-top: 1px solid rgba(255,255,255,.08);
+            padding: 4px 0;
+        }
+        #mobile-nav .mob-header {
+            padding: 8px 20px 4px;
+            font-size: .68rem; font-weight: 700;
+            color: rgba(255,255,255,.4);
+            text-transform: uppercase; letter-spacing: .08em;
+        }
+        #mobile-nav .mob-indent { padding-left: 36px; }
+        #mobile-nav .sign-out-btn { color: #f87171; }
+
+        @media (max-width: 991px) {
+            .site-nav-brand { display: flex; }
+            .site-nav-links { display: none; }
+            .site-nav-right { display: none; }
+            .site-nav-toggle { display: flex; }
+        }
+
+        /* ── Flash alerts ────────────────────────────────────────────── */
+        .alert { margin: 0; border-radius: 0; }
+
+        /* ── Footer ──────────────────────────────────────────────────── */
+        footer#footer {
+            background: linear-gradient(135deg, var(--ffd-blue) 0%, #0a1f33 100%);
+            color: #94a3b8;
+            padding: 30px 0 24px;
+            margin-top: 50px;
+            font-size: 0.85rem;
+            position: relative;
+        }
+        footer#footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--ffd-accent), var(--ffd-green), var(--ffd-gold));
+        }
+        footer#footer a {
+            color: var(--ffd-accent);
+            transition: color .2s ease;
+        }
+        footer#footer a:hover { color: #fff; text-decoration: none; }
+        footer#footer strong { color: #fff; }
+
+        /* ── Instance notice toasts (local + staging) ────────────────── */
+        .instance-toast {
+            display: none;
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            max-width: 340px;
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0,0,0,.45);
+            padding: 14px 16px;
+            font-size: .82rem;
+            line-height: 1.5;
+            animation: slideInToast .3s ease;
+        }
+        .instance-toast .lit-inner {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .instance-toast .lit-icon {
+            font-size: 1.1rem;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .instance-toast .lit-body { flex: 1; }
+        .instance-toast .lit-title {
+            font-weight: 700;
+            font-size: .85rem;
+            margin-bottom: 2px;
+        }
+        .instance-toast .lit-dismiss {
+            background: none;
+            border: none;
+            font-size: 1rem;
+            line-height: 1;
+            padding: 0 0 0 10px;
+            cursor: pointer;
+            flex-shrink: 0;
+            align-self: flex-start;
+            transition: color .15s;
+        }
+        @keyframes slideInToast {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @media (max-width: 575px) {
+            .instance-toast { right: 12px; left: 12px; max-width: none; bottom: 16px; }
+        }
+        /* Local — amber */
+        #local-instance-toast {
+            background: #1c1917;
+            border-left: 4px solid #f59e0b;
+            color: #fef3c7;
+        }
+        #local-instance-toast .lit-icon  { color: #f59e0b; }
+        #local-instance-toast .lit-title { color: #fbbf24; }
+        #local-instance-toast .lit-dismiss { color: rgba(254,243,199,.5); }
+        #local-instance-toast .lit-dismiss:hover { color: #fef3c7; }
+        /* Staging — indigo */
+        #staging-instance-toast {
+            background: #1e1b4b;
+            border-left: 4px solid #818cf8;
+            color: #e0e7ff;
+        }
+        #staging-instance-toast .lit-icon  { color: #818cf8; }
+        #staging-instance-toast .lit-title { color: #a5b4fc; }
+        #staging-instance-toast .lit-dismiss { color: rgba(224,231,255,.4); }
+        #staging-instance-toast .lit-dismiss:hover { color: #e0e7ff; }
+    </style>
+
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/owl.carousel@2.3.4/dist/assets/owl.carousel.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/owl.carousel@2.3.4/dist/assets/owl.theme.default.min.css">
+
+    <style>
+        /* ── Hero banner ──────────────────────────────────────────────── */
+        .home-hero {
+            background: linear-gradient(135deg, #1a3a5c 0%, #1a73e8 100%);
+            color: #fff;
+            padding: 32px 0 24px;
+        }
+        .home-hero h1 { font-size: 1.6rem; font-weight: 800; margin-bottom: 4px; }
+        .home-hero p  { opacity: .88; font-size: .95rem; margin: 0; }
+
+        /* ── Publication cards ────────────────────────────────────────── */
+        .pub-card {
+            display: flex;
+            align-items: stretch;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 14px rgba(0,0,0,.09);
+            transition: box-shadow .25s, transform .2s;
+            background: #fff;
+            text-decoration: none !important;
+            height: 100%;
+        }
+        .pub-card:hover { box-shadow: 0 6px 28px rgba(0,0,0,.15); transform: translateY(-2px); }
+        .pub-card-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 68px;
+            flex-shrink: 0;
+            font-size: 1.7rem;
+        }
+        .bulletin-card .pub-card-icon  { background: #1a3a5c; color: #fff; }
+        .advisory-card .pub-card-icon  { background: #c0392b; color: #fff; }
+        .pub-card-body  { padding: 16px 18px; flex: 1; }
+        .pub-card-title { font-size: 1rem; font-weight: 700; color: #222; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+        .pub-card-date  { font-size: .76rem; color: #888; margin-bottom: 6px; }
+        .pub-card-excerpt { font-size: .86rem; color: #555; margin-bottom: 10px; line-height: 1.55; }
+        .pub-card-empty   { font-size: .86rem; color: #aaa; margin-bottom: 10px; font-style: italic; }
+        .pub-card-link    { font-size: .82rem; font-weight: 700; }
+        .bulletin-card .pub-card-link { color: #1a3a5c; }
+        .advisory-card .pub-card-link { color: #c0392b; }
+        .advisory-live-badge {
+            font-size: .58rem; font-weight: 800; letter-spacing: .08em;
+            background: #c0392b; color: #fff; padding: 2px 7px; border-radius: 50px;
+            animation: pulse-badge 1.5s infinite;
+        }
+        @keyframes pulse-badge {
+            0%,100% { opacity: 1; }
+            50%      { opacity: .5; }
+        }
+
+        /* ── Weather carousel ─────────────────────────────────────────── */
+        .box {
+            background: #fff;
+            padding: 14px 10px 12px;
+            border-radius: 8px;
+            margin: 4px;
+            box-shadow: 0 1px 6px rgba(0,0,0,.12);
+            text-align: center;
+            cursor: pointer;
+        }
+        .box h1 { font-size: 0.78rem; font-weight: 700; color: #444; margin: 0 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .box .temp { font-size: 2.4rem; font-weight: 800; line-height: 1; color: #1a3a5c; }
+        .box .temp.hot { color: #c0392b; }
+        .box .meta-row { display: flex; justify-content: space-around; margin-top: 8px; }
+        .box .meta-item { font-size: .72rem; color: #666; }
+        .box .meta-item strong { display: block; font-size: .85rem; color: #333; font-weight: 700; }
+
+        /* ── Section card wrapper ─────────────────────────────────────── */
+        .home-section-card {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,.07);
+            overflow: hidden;
+        }
+        .home-section-card .section-header {
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .home-section-card .section-title {
+            font-size: .82rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            color: #555;
+            margin: 0;
+        }
+
+        /* ── Quick links ──────────────────────────────────────────────── */
+        .quicklinks-section { padding: 44px 0; background: #f0f4f8; }
+        .ql-group-heading {
+            font-size: .7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: #1a73e8;
+            margin: 18px 0 8px;
+        }
+        .ql-group-heading:first-child { margin-top: 0; }
+        .ql-list { list-style: none; padding: 0; margin: 0; }
+        .ql-list li a {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            color: #333;
+            font-size: .86rem;
+            font-weight: 600;
+            padding: 5px 0;
+            text-decoration: none;
+            border-bottom: 1px dashed transparent;
+            transition: color .15s;
+        }
+        .ql-list li a:hover { color: #1a73e8; border-bottom-color: #d0e0fb; }
+        .ql-list li a i { color: #1a73e8; font-size: .75rem; flex-shrink: 0; }
+
+        /* ── MAF Forecast Widget ─────────────────────────────────────── */
+        .maf-season-strip {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px;
+            background: #1a3a5c;
+            color: #fff;
+        }
+        .maf-season-badge {
+            font-size: .88rem;
+            font-weight: 800;
+            background: rgba(255,255,255,.15);
+            padding: 2px 12px;
+            border-radius: 50px;
+            margin-right: 10px;
+            letter-spacing: .02em;
+        }
+        .maf-period  { font-size: .82rem; opacity: .8; }
+        .maf-updated { font-size: .73rem; opacity: .55; white-space: nowrap; }
+        .maf-dam-card {
+            padding: 16px 20px 14px;
+            border-right: 1px solid #e9ecef;
+            flex: 1;
+        }
+        .maf-dam-card:last-child { border-right: none; }
+        .maf-dam-label {
+            font-size: .7rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: .09em; color: #999; margin-bottom: 4px;
+        }
+        .maf-dam-value {
+            font-size: 2.1rem; font-weight: 800; color: #1a3a5c;
+            line-height: 1; margin-bottom: 8px;
+        }
+        .maf-dam-value .maf-unit { font-size: .78rem; font-weight: 600; color: #aaa; }
+        .maf-bar-track {
+            height: 5px; background: #e9ecef; border-radius: 3px;
+            overflow: hidden; margin-bottom: 7px;
+        }
+        .maf-bar-fill { height: 100%; border-radius: 3px; max-width: 100%; }
+        .maf-above .maf-bar-fill { background: #27ae60; }
+        .maf-below .maf-bar-fill { background: #e67e22; }
+        .maf-near  .maf-bar-fill { background: #1a73e8; }
+        .maf-meta-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .maf-status-badge {
+            font-size: .67rem; font-weight: 800; padding: 2px 8px;
+            border-radius: 50px; letter-spacing: .05em; text-transform: uppercase;
+        }
+        .maf-above .maf-status-badge { background: #d4edda; color: #1a6b35; }
+        .maf-below .maf-status-badge { background: #fde8d4; color: #9e4a10; }
+        .maf-near  .maf-status-badge { background: #d1e8ff; color: #1a52a8; }
+        .maf-normal-label { font-size: .73rem; color: #aaa; }
+        .maf-dams-row { display: flex; }
+        .maf-notes {
+            padding: 9px 16px; background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            font-size: .82rem; color: #666;
+        }
+
+        /* ── Newsletter section ───────────────────────────────────────── */
+        .newsletter-section {
+            background: linear-gradient(135deg, #1a3a5c 0%, #0d1f36 100%);
+            padding: 52px 0;
+        }
+        .newsletter-section h2 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 6px;
+        }
+        .newsletter-section p {
+            color: rgba(255,255,255,.75);
+            margin-bottom: 0;
+        }
+        .newsletter-card {
+            background: rgba(255,255,255,.06);
+            border: 1px solid rgba(255,255,255,.12);
+            border-radius: 14px;
+            padding: 32px 36px;
+        }
+        .newsletter-card label { color: rgba(255,255,255,.8); font-size: .85rem; font-weight: 600; margin-bottom: 4px; }
+        .newsletter-card .form-control {
+            background: rgba(255,255,255,.08);
+            border: 1px solid rgba(255,255,255,.2);
+            color: #fff;
+            border-radius: 6px;
+        }
+        .newsletter-card .form-control::placeholder { color: rgba(255,255,255,.4); }
+        .newsletter-card .form-control:focus {
+            background: rgba(255,255,255,.12);
+            border-color: rgba(255,255,255,.45);
+            color: #fff;
+            box-shadow: none;
+        }
+        .newsletter-card .btn-subscribe {
+            background: #1a73e8;
+            border: none;
+            color: #fff;
+            font-weight: 700;
+            font-size: .95rem;
+            padding: 10px 36px;
+            border-radius: 50px;
+            transition: background .2s, transform .15s;
+        }
+        .newsletter-card .btn-subscribe:hover {
+            background: #1558b8;
+            transform: translateY(-1px);
+        }
+        .newsletter-benefit {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            color: rgba(255,255,255,.72);
+            font-size: .85rem;
+            margin-bottom: 10px;
+        }
+        .newsletter-benefit i { color: #4db6ac; font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+    </style>
+
+    
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "GovernmentOrganization",
+        "name": "Flood Forecasting Division",
+        "alternateName": ["FFD", "FFD Lahore"],
+        "url": "https://ffd.pmd.gov.pk",
+        "logo": "https://ffd.pmd.gov.pk/images/ffd-logo.png",
+        "description": "Flood Forecasting Division (FFD) is a specialized unit of Pakistan Meteorological Department responsible for flood forecasting and early warning systems in Pakistan.",
+        "parentOrganization": {
+            "@type": "GovernmentOrganization",
+            "name": "Pakistan Meteorological Department",
+            "alternateName": "PMD",
+            "url": "https://www.pmd.gov.pk"
+        },
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Lahore",
+            "addressRegion": "Punjab",
+            "addressCountry": "PK"
+        }
+    }
+    </script>
+    </head>
+<body>
+
+<!-- ── Topbar ───────────────────────────────────────────────────── -->
+<div class="site-topbar">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="topbar-left">
+                <span class="badge-live">Live</span>
+                <a href="/cdn-cgi/l/email-protection#b6d0d0d2f6c1d3d7c2ded3c498d1d9c098c6dd">
+                    <i class="bi bi-envelope mr-1"></i><span class="__cf_email__" data-cfemail="0f69696b4f786a6e7b676a7d21686079217f64">[email&#160;protected]</span>
+                </a>
+            </div>
+            <div class="topbar-right">
+                <a href="http://www.pmd.gov.pk" target="_blank">
+                    <i class="bi bi-globe2 mr-1"></i>PMD Website
+                </a>
+                <a href="https://ffd.pmd.gov.pk/contact-us">
+                    <i class="bi bi-telephone mr-1"></i>Contact
+                </a>
+                <a href="https://ffd.pmd.gov.pk/address-book">
+                    <i class="bi bi-people mr-1"></i>Directory
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Main header (logo + name) ──────────────────────────────────── -->
+<header class="site-header">
+    <div class="container">
+        <div class="site-header-inner">
+
+            <a href="https://ffd.pmd.gov.pk" class="site-logo-block">
+                <img src="https://ffd.pmd.gov.pk/images/web-logo.png" alt="FFD Logo">
+                <div class="site-logo-text">
+                    <div class="org-name">Flood Forecasting Division, Lahore</div>
+                    <div class="org-parent">Pakistan Meteorological Department</div>
+                    <div class="org-ministry">Ministry of Defence, Government of Pakistan</div>
+                </div>
+            </a>
+
+            <div class="header-info-cards">
+                <a href="https://ffd.pmd.gov.pk/flood-dashboard" target="_blank"
+                   class="header-card card-rain-watch">
+                    <div class="card-icon"><i class="bi bi-display"></i></div>
+                    <div>
+                        <div class="card-label">Flood Dashboard</div>
+                        <div class="card-value">Rivers · Radar · Forecasts · Alerts</div>
+                    </div>
+                    <i class="bi bi-arrow-right card-arrow"></i>
+                </a>
+            </div>
+
+        </div>
+    </div>
+</header>
+
+<!-- ── Sticky navbar ──────────────────────────────────────────────── -->
+<div id="site-nav">
+    <div class="container">
+        <div class="site-nav-inner">
+
+            
+            <a href="https://ffd.pmd.gov.pk" class="site-nav-brand">FFD Lahore</a>
+
+            
+            <ul class="site-nav-links">
+                <li class="">
+                    <a href="https://ffd.pmd.gov.pk"><i class="bi bi-house-door"></i> Home</a>
+                </li>
+
+                <li class="has-drop ">
+                    <a href="https://ffd.pmd.gov.pk/bulletin"><i class="bi bi-journal-text"></i> Publications</a>
+                    <div class="site-nav-drop">
+                        <a href="https://ffd.pmd.gov.pk/bulletin"><i class="bi bi-grid"></i>All Publications</a>
+                        <div class="drop-divider"></div>
+                        <a href="https://ffd.pmd.gov.pk/bulletin/bulletin"><i class="bi bi-file-text"></i>Flood Bulletins</a>
+                        <a href="https://ffd.pmd.gov.pk/bulletin/advisory"><i class="bi bi-exclamation-triangle"></i>Advisories</a>
+                        <a href="https://ffd.pmd.gov.pk/flood-reports"><i class="bi bi-file-earmark-pdf"></i>Flood Reports</a>
+                        <a href="https://ffd.pmd.gov.pk/notifications"><i class="bi bi-megaphone"></i>Updates &amp; Notifications</a>
+                        <div class="drop-divider"></div>
+                        <div class="drop-header">System Info</div>
+                        <a href="https://ffd.pmd.gov.pk/flood-ews"><i class="bi bi-shield-check"></i>Early Warning System</a>
+                    </div>
+                </li>
+
+                <li class="">
+                    <a href="https://ffd.pmd.gov.pk/flood-dashboard" target="_blank"><i class="bi bi-display"></i> Flood Dashboard</a>
+                </li>
+
+                <li class="">
+                    <a href="https://ffd.pmd.gov.pk/flood-limits"><i class="bi bi-bar-chart-line"></i> Flood Limits</a>
+                </li>
+
+                <li class="">
+                    <a href="https://ffd.pmd.gov.pk/about"><i class="bi bi-info-circle"></i> About</a>
+                </li>
+
+                <li class="">
+                    <a href="https://ffd.pmd.gov.pk/internships"><i class="bi bi-mortarboard"></i> Internships</a>
+                </li>
+
+                <li class="">
+                    <a href="https://ffd.pmd.gov.pk/contact-us"><i class="bi bi-chat-dots"></i> Contact</a>
+                </li>
+
+                            </ul>
+
+            
+            <div class="site-nav-right">
+                                    <a href="https://ffd.pmd.gov.pk/login" class="snr-btn snr-btn-login">
+                        <i class="bi bi-box-arrow-in-right"></i> Sign In
+                    </a>
+                            </div>
+
+            
+            <button class="site-nav-toggle" id="mobileNavToggle" aria-label="Toggle navigation">
+                <i class="bi bi-list"></i>
+            </button>
+
+        </div>
+    </div>
+
+    
+    <div id="mobile-nav">
+        <a href="https://ffd.pmd.gov.pk"><i class="bi bi-house-door"></i> Home</a>
+        <a href="https://ffd.pmd.gov.pk/bulletin"><i class="bi bi-journal-text"></i> Publications</a>
+        <div class="mob-indent">
+            <a href="https://ffd.pmd.gov.pk/bulletin/bulletin">Flood Bulletins</a>
+            <a href="https://ffd.pmd.gov.pk/bulletin/advisory">Advisories</a>
+            <a href="https://ffd.pmd.gov.pk/flood-reports">Flood Reports</a>
+            <a href="https://ffd.pmd.gov.pk/notifications">Updates &amp; Notifications</a>
+            <a href="https://ffd.pmd.gov.pk/flood-ews" class="mob-indent"><i class="bi bi-shield-check"></i> Early Warning System</a>
+        </div>
+        <a href="https://ffd.pmd.gov.pk/flood-dashboard" target="_blank"><i class="bi bi-display"></i> Flood Dashboard</a>
+        <a href="https://ffd.pmd.gov.pk/flood-limits"><i class="bi bi-bar-chart-line"></i> Flood Limits</a>
+        <a href="https://ffd.pmd.gov.pk/about"><i class="bi bi-info-circle"></i> About</a>
+        <a href="https://ffd.pmd.gov.pk/internships"><i class="bi bi-mortarboard"></i> Internships</a>
+        <a href="https://ffd.pmd.gov.pk/contact-us"><i class="bi bi-chat-dots"></i> Contact</a>
+                <div class="mob-section">
+            <a href="https://ffd.pmd.gov.pk/login"><i class="bi bi-box-arrow-in-right"></i> Sign In</a>
+        </div>
+            </div>
+</div>
+
+<!-- ── Flash messages ─────────────────────────────────────────────── -->
+
+
+
+<div class="home-hero">
+    <div class="container">
+        <h1><i class="bi bi-cloud-rain-heavy mr-2"></i>Flood Forecasting Division</h1>
+        <p>Real-time flood monitoring, bulletins, and advisories for Pakistan's major rivers</p>
+    </div>
+</div>
+
+
+<div class="container mt-4">
+    <div class="row">
+
+        
+        <div class="col-md-6 mb-3">
+            <a href="https://ffd.pmd.gov.pk/bulletin/bulletin" class="text-decoration-none d-block h-100">
+                <div class="pub-card bulletin-card">
+                    <div class="pub-card-icon"><i class="bi bi-file-text-fill"></i></div>
+                    <div class="pub-card-body">
+                        <h4 class="pub-card-title">Flood Bulletin</h4>
+                                                    <div class="pub-card-date"><i class="bi bi-clock mr-1"></i>21 Jul 2026, 11:45</div>
+                            <p class="pub-card-excerpt">Rivers at a glanceINDUSLow(Tarbela)KABULBelow LowJHELUMBelow LowCHENABLow(Khanki)RAVIBelow LowSUTLEJBelow LowF...</p>
+                                                <span class="pub-card-link">View Bulletins <i class="bi bi-arrow-right"></i></span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        
+        <div class="col-md-6 mb-3">
+            <a href="https://ffd.pmd.gov.pk/bulletin/advisory" class="text-decoration-none d-block h-100">
+                <div class="pub-card advisory-card">
+                    <div class="pub-card-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+                    <div class="pub-card-body">
+                        <h4 class="pub-card-title">
+                            Flood Advisory
+                                                    </h4>
+                                                    <div class="pub-card-date"><i class="bi bi-clock mr-1"></i>16 Jun 2026, 17:01</div>
+                            <p class="pub-card-excerpt">Flash Flood AdvisoryDG Khan Division Hill Torrents According to the latest hydrometeorological conditions, sca...</p>
+                                                <span class="pub-card-link">View Advisories <i class="bi bi-arrow-right"></i></span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+    </div>
+</div>
+
+
+<div class="container mt-1 mb-3">
+    <div class="pinned-update">
+        <div class="pinned-update-head">
+            <span class="pinned-update-tag"><i class="bi bi-pin-angle-fill mr-1"></i>Pinned Update</span>
+            <span class="pinned-update-time"><i class="bi bi-clock mr-1"></i>21 Jul 2026, 12:18</span>
+        </div>
+        <style>
+    @font-face { font-family: 'Yokawerad'; src: url("https://ffd.pmd.gov.pk/fonts/Yokawerad.otf") format('opentype'); font-display: swap; }
+    /* Self-hosted Urdu Nastaliq (SIL OFL). Declared in the card's OWN <style> so it
+       ships with the inline fragment too — the "Download image" / "Copy image" capture
+       injects that fragment off-screen on a host page that never loads the Google CDN
+       Urdu <link>, so a CDN-only font rasterised to a serif fallback (jumbled Urdu),
+       worst on mobile. Same-origin + font-weight range (variable font, wght 400–700)
+       makes the download match the on-screen card exactly. */
+    @font-face { font-family: 'Noto Nastaliq Urdu'; font-style: normal; font-weight: 400 700; font-display: swap; src: url("https://ffd.pmd.gov.pk/fonts/NotoNastaliqUrdu.woff2") format('woff2'); }
+
+    .u-doc {
+        --u-bg: #ffffff;
+        --u-text: #1f2937;
+        --u-text-rgb: 31, 41, 55;
+        --u-accent: #2563eb;
+        --u-font: "Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", "Noto Naskh Arabic", "Nunito", system-ui, sans-serif;
+        --u-scale: 0.9;
+    }
+    .u-doc, .u-doc * { box-sizing: border-box; }
+        .u-doc { background: #e9ecef; font-family: var(--u-font); -webkit-font-smoothing: antialiased;  margin: 0; padding: 0;  }
+
+    /* Portrait "story" card centred on a grey backdrop. */
+    .u-wrap { display: flex; justify-content: center; padding: 22px 16px 30px; }
+    .u-card {
+        width: 100%; max-width: 480px; background: var(--u-bg); color: var(--u-text);
+        border-radius: 18px; overflow: hidden; box-shadow: 0 10px 34px rgba(15, 41, 66, .18);
+        position: relative;
+        /* `dir` only supplies the DEFAULT alignment, so any inherited text-align
+           beats it. Standalone that never happens; as an inline fragment on the
+           public homepage, Bootstrap Reboot's `body { text-align: left }` leaks in
+           and flushes Urdu cards to the left. `start` re-binds alignment to this
+           element's own dir — a no-op for the standalone card (it is the initial
+           value) and the fix for the embedded one. */
+        text-align: start;
+    }
+    .u-pad { padding: 24px 26px 26px; }
+
+    /* Draft stamp — shown only for unpublished updates (CMS preview + composer);
+       a published card never carries it. Clipped by .u-card's overflow. */
+    .u-draft-wm { position: absolute; inset: 0; z-index: 6; pointer-events: none; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .u-draft-wm span { font-family: var(--u-font); font-size: 76px; font-weight: 900; line-height: 1; letter-spacing: .14em; text-transform: uppercase; color: rgba(220, 38, 38, .20); border: 6px solid rgba(220, 38, 38, .22); border-radius: 14px; padding: 8px 30px; transform: rotate(-22deg); white-space: nowrap; }
+
+    .u-title { font-size: calc(24px * var(--u-scale)); line-height: 1.22; font-weight: 800; margin: 0 0 12px; color: var(--u-text); letter-spacing: -.01em; }
+
+    .u-image { width: 100%; display: block; object-fit: cover; background: rgba(0,0,0,.05); }
+
+    /* Footer: brand on the left, severity flag on the right.
+       `color` was hardcoded `black`, which on the dark presets painted a black
+       footer at .72 opacity onto a near-black card — invisible. It follows the
+       card's own text colour now.
+       The .72 dim lives on the brand span, NOT the row: it must not wash out the
+       flag, whose whole job is to be read. */
+    .u-foot { direction: ltr; color: var(--u-text); margin-top: 20px; padding-top: 14px; border-top: 1px solid rgba(var(--u-text-rgb), .16); font-size: calc(12px * var(--u-scale)); display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+    .u-foot strong { font-weight: 700; }
+    .u-foot-brand { opacity: .72; }
+    /* Pushed to the trailing edge so a flag with no date still sits right. */
+    .u-flag { margin-inline-start: auto; font-size: calc(10.5px * var(--u-scale)); font-weight: 800; text-transform: uppercase; letter-spacing: .06em; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+
+    /* ── Rich body (inherits card text colour) ─────────────────────────── */
+    .u-body { font-size: calc(15.5px * var(--u-scale)); line-height: 1.62; color: var(--u-text); word-wrap: break-word; }
+    .u-body p { margin: 0 0 .7em; }
+    .u-body p:last-child { margin-bottom: 0; }
+    .u-body h3 { font-size: calc(18px * var(--u-scale)); font-weight: 800; margin: 1em 0 .4em; }
+    .u-body h4 { font-size: calc(16px * var(--u-scale)); font-weight: 700; margin: 1em 0 .4em; }
+    /* Logical inset, so RTL list markers sit on the right. Identical to
+       padding-left under LTR. */
+    .u-body ul, .u-body ol { padding-inline-start: 1.35em; margin: 0 0 .7em; }
+    .u-body li { margin: .18em 0; }
+    .u-body a { color: var(--u-accent); text-decoration: underline; font-weight: 600; }
+    .u-body strong { font-weight: 700; }
+    .u-body blockquote { margin: 0 0 .7em; padding: .4em 0 .4em 1em; border-left: 3px solid var(--u-accent); opacity: .92; }
+    .u-body hr { border: 0; border-top: 1px solid rgba(var(--u-text-rgb), .2); margin: 1em 0; }
+
+    /* ── standard ──────────────────────────────────────────────────────── */
+    .layout-standard .u-accentbar { height: 5px; background: var(--u-accent); }
+    .layout-standard .u-image { border-radius: 12px; margin-bottom: 16px; max-height: 280px; }
+
+    /* ── Official letterhead (optional, any layout) ────────────────────────
+       Always a white band with navy text so the GoP/PMD logos stay legible on
+       any card palette; the template accent is used for the divider + ministry
+       line (wise use of the palette without hurting contrast). */
+    .u-govhead { display: flex; align-items: center; gap: 10px; padding: 13px 16px; background: #ffffff; border-bottom: 3px solid var(--u-accent); }
+    .u-govhead img { height: 50px; width: auto; flex: 0 0 auto; }
+    .u-govhead .u-govtext { flex: 1 1 auto; min-width: 0; text-align: center; line-height: 1.3; }
+    /* The country-name line (g1) stays on a single line — sized to fit, never wrap. */
+    .u-govhead .g1 { font-size: 14px; font-weight: 700; color: #066a26; white-space: nowrap; }
+    .u-govhead .g2 { font-size: 12px; font-weight: 700; color: var(--u-accent); }
+    .u-govhead .g3 { font-size: 11.5px; font-weight: 600; color: #0f2942; opacity: .78; }
+    .u-govhead .g4 { font-size: 11px; font-weight: 600; color: #0f2942; opacity: .6; }
+
+    /* ── image_top ─────────────────────────────────────────────────────── */
+    .layout-image_top .u-image { height: 240px; }
+    .layout-image_top .u-title { font-size: calc(25px * var(--u-scale)); }
+
+    /* ── solid ─────────────────────────────────────────────────────────── */
+    .layout-solid .u-pad { padding: 34px 30px 30px; text-align: center; }
+    .layout-solid .u-title { font-size: calc(27px * var(--u-scale)); }
+    .layout-solid .u-body { font-size: calc(16px * var(--u-scale)); }
+    .layout-solid .u-image { border-radius: 12px; margin: 6px 0 18px; max-height: 260px; }
+    .layout-solid .u-foot { border-top-color: rgba(var(--u-text-rgb), .26); }
+
+    /* ── quote ─────────────────────────────────────────────────────────── */
+    .layout-quote .u-pad { padding: 30px 30px 26px; }
+    .layout-quote .u-quotemark { font-family: Georgia, serif; font-size: calc(62px * var(--u-scale)); line-height: .6; color: var(--u-accent); height: 34px; }
+    .layout-quote .u-body { font-size: calc(18px * var(--u-scale)); line-height: 1.55; font-style: italic; }
+    .layout-quote .u-title { font-size: calc(16px * var(--u-scale)); font-weight: 700; opacity: .8; margin: 16px 0 0; }
+    .layout-quote .u-title::before { content: "— "; color: var(--u-accent); }
+    .layout-quote .u-image { border-radius: 12px; margin-bottom: 16px; max-height: 240px; }
+
+    /* ── banner — River / Flood Advisory ───────────────────────────────────
+       The severity colour is the card itself (resolveStyle() sets bg = accent
+       for this layout), so there is no separate coloured band any more. That
+       band used to be rendered unconditionally, which meant a titleless
+       advisory opened with ~60px of empty colour before its first word; with
+       the fill there is nothing left to announce, and a titleless card now
+       starts flush like the Official Notice and Announcement templates do.
+
+       What the fill costs, and what is paid back here: --u-accent now equals
+       the background, so anything painted with it would vanish. Links, the
+       blockquote rule and the severity flag are re-derived from the card's own
+       ink instead. */
+    .layout-banner .u-title { font-size: calc(23px * var(--u-scale)); }
+    .layout-banner .u-image { border-radius: 12px; margin-bottom: 16px; max-height: 260px; }
+    .layout-banner .u-body a { color: inherit; text-decoration: underline; }
+    .layout-banner .u-body blockquote { border-left-color: rgba(var(--u-text-rgb), .45); }
+    .layout-banner .u-foot { border-top-color: rgba(var(--u-text-rgb), .3); }
+    /* The flag's fill IS the card, so a solid chip would be invisible. Outlined
+       in the card ink instead — the label still prints, which is the part
+       FloodStatus requires (colour is never the only carrier of meaning).
+       `!important` because _foot sets the palette inline; a real `border` rather
+       than an inset box-shadow because html2canvas — which rasterises this card
+       for "Copy image" / "Download image" — does not draw box-shadows. */
+    .layout-banner .u-flag { background: transparent !important; color: var(--u-text) !important; border: 1.5px solid rgba(var(--u-text-rgb), .55); }
+</style>
+<div class="u-doc">
+<div class="u-wrap">
+    <div class="u-card layout-standard" dir="rtl">
+
+        
+        
+                    
+            <div class="u-govhead" dir="ltr">
+                <img src="/images/gop-logo.png" alt="Government of Pakistan">
+                <div class="u-govtext">
+                    <div class="g1">Government of Pakistan</div>
+                    <div class="g2">Ministry of Defence</div>
+                    <div class="g3">Pakistan Meteorological Department</div>
+                    <div class="g4">Flood Forecasting Division, Lahore</div>
+                </div>
+                <img src="/images/web-logo.png" alt="PMD / FFD">
+            </div>
+        
+         
+                                <div class="u-pad">
+                                                            <div class="u-body"><p>🔹21 سے 24 جولائی کے دوران:<br>▪️دریائے چناب میں مرالہ اور جہلم میں منگلاء (Upstream) پر اونچے درجے (High) کے سیلاب کا امکان۔<br>▪️دریائے کابل اور اسکے اہم ملحقہ نالوں میں اونچے درجے(High) کے سیلاب کا امکان۔<br>▪️دریائے جہلم, چناب اور راوی کے اہم ملحقہ نالوں میں طغیانی کا امکان۔<br>▪️خیبر پختونخواہ, ڈیرہ غازی خان ڈویژن اور شمالی بلوچستان کے برساتی نالوں می فلیش فلڈنگ کا امکان ۔<br>▪️ راولپنڈی،جہلم، گجرانوالہ، سوگودھا، میانوالی، منڈی بہاوالدین،  خوشاب،  سیالکوٹ، گجرات، ناروال، لاہور، اوکارہ، ساہیوال اور فیصل آباد میں اربن فلڈنگ کا امکان۔<br>🔹اگلے 24 گھنٹوں کے دوران:<br>▪️مرالہ، خانکی، قادرآباد اور منگلاء پر نچلے سے اونچے درجے (Low-High) کے سیلاب کا امکان۔<br>▪️تربیلا، کالاباغ، چشمہ، نوشہرہ اور بلوکی کے مقام پر نچلے درجے کے سیلاب کا امکان۔</p></div>
+                    <div class="u-foot">
+                    <span class="u-foot-brand"><strong>FFD Lahore</strong> · 21 Jul 2026, 12:18 PM</span>
+                    </div>
+                </div>
+        
+    </div>
+</div>
+</div>
+
+        <div class="pinned-update-foot">
+            <button type="button" class="btn btn-sm btn-outline-danger pinned-like"
+                    data-like-btn data-id="189" data-liked="0"
+                    aria-pressed="false">
+                <i class="bi bi-heart"></i>
+                <span class="like-label">Like</span>
+                <span class="like-count">2</span>
+            </button>
+                        <a href="https://ffd.pmd.gov.pk/notifications/2026-07-21/7b62201ea0" class="btn btn-sm btn-outline-secondary ml-2">
+                <i class="bi bi-box-arrow-up-right mr-1"></i>Open
+            </a>
+                        <a href="https://ffd.pmd.gov.pk/notifications" class="btn btn-sm btn-primary ml-auto">
+                <i class="bi bi-bell mr-1"></i>See all notifications
+            </a>
+        </div>
+    </div>
+</div>
+<style>
+    .pinned-update { border:1px solid #e4e8ef; border-radius:10px; overflow:hidden; background:#fff; }
+    .pinned-update-head { display:flex; align-items:center; flex-wrap:wrap; gap:8px; padding:9px 14px; background:#f4f6fa; border-bottom:1px solid #e4e8ef; }
+    .pinned-update-tag { font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:#b91c1c; }
+    .pinned-update-time { font-size:.75rem; color:#888; margin-left:auto; }
+    /* The card fragment paints its own grey backdrop; trim its outer padding so it
+       sits flush inside this panel. */
+    .pinned-update .u-wrap { padding:16px 12px 20px; }
+    .pinned-update-foot { display:flex; align-items:center; flex-wrap:wrap; gap:6px; padding:9px 14px; background:#f9fafc; border-top:1px solid #e4e8ef; }
+    .pinned-update-foot .ml-auto { margin-left:auto; }
+    .pinned-update .pinned-like.liked, .pinned-update .pinned-like.liked:hover { background:#e0245e; border-color:#e0245e; color:#fff; }
+    .pinned-update .pinned-like .like-count { margin-left:5px; font-weight:700; }
+</style>
+
+
+<div class="container mt-1 mb-2">
+    <div class="d-flex align-items-center flex-wrap" style="gap:8px 6px; padding:10px 14px; background:#f4f6fa; border-radius:8px; border:1px solid #e4e8ef;">
+        <span style="font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:#888; margin-right:4px;">
+            <i class="bi bi-archive mr-1"></i>Archive:
+        </span>
+                <a href="https://ffd.pmd.gov.pk/bulletins/archive?year=2025"
+           class="badge badge-secondary"
+           style="font-size:.8rem; font-weight:600; padding:4px 10px; background:#1a3a5c; color:#fff; border-radius:50px; text-decoration:none;">
+            2025 <span style="opacity:.7;">(135)</span>
+        </a>
+                <a href="https://ffd.pmd.gov.pk/bulletins/archive?year=2024"
+           class="badge badge-secondary"
+           style="font-size:.8rem; font-weight:600; padding:4px 10px; background:#1a3a5c; color:#fff; border-radius:50px; text-decoration:none;">
+            2024 <span style="opacity:.7;">(132)</span>
+        </a>
+                <a href="https://ffd.pmd.gov.pk/bulletins/archive"
+           style="font-size:.8rem; color:#1a73e8; font-weight:600; margin-left:4px; text-decoration:none;">
+            View all <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+</div>
+
+
+<style>
+    .fw-promo { display:flex; align-items:center; gap:14px; background:linear-gradient(135deg,#0e7490,#0891b2); color:#fff; border-radius:12px; padding:14px 18px; box-shadow:0 3px 14px rgba(8,145,178,.25); transition:transform .15s, box-shadow .15s; }
+    .fw-promo:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(8,145,178,.32); color:#fff; }
+    .fw-promo-icon { font-size:1.9rem; flex:0 0 auto; opacity:.95; }
+    .fw-promo-body { flex:1 1 auto; min-width:0; }
+    .fw-promo-title { font-size:1.05rem; font-weight:800; display:flex; align-items:center; gap:8px; }
+    .fw-promo-sub { font-size:.82rem; opacity:.92; margin-top:1px; }
+    .fw-promo-cta { flex:0 0 auto; font-weight:700; font-size:.85rem; background:rgba(255,255,255,.2); padding:7px 13px; border-radius:8px; white-space:nowrap; }
+    .fw-beta-badge { font-size:.6rem; font-weight:800; letter-spacing:.08em; background:#facc15; color:#713f12; padding:2px 7px; border-radius:20px; text-transform:uppercase; }
+    @media (max-width:576px){ .fw-promo-cta{ display:none; } .fw-promo-sub{ font-size:.76rem; } .fw-promo-icon{ font-size:1.5rem; } }
+</style>
+<div class="container mt-2 mb-2">
+    <a href="https://ffd.pmd.gov.pk/data/flood-watch" class="fw-promo text-decoration-none">
+        <div class="fw-promo-icon"><i class="bi bi-cloud-rain-heavy-fill"></i></div>
+        <div class="fw-promo-body">
+            <div class="fw-promo-title">Flood Watch <span class="fw-beta-badge">Beta</span></div>
+            <div class="fw-promo-sub">New interactive rainfall &amp; river-gauge flood map. Experimental beta — features and data may be incomplete or change.</div>
+        </div>
+        <span class="fw-promo-cta">Open map <i class="bi bi-arrow-right"></i></span>
+    </a>
+</div>
+
+
+<div class="container mt-2 mb-3">
+    <div class="home-section-card">
+        <div class="section-header">
+            <span class="section-title"><i class="bi bi-water mr-1"></i>Latest Flow of Rivers &nbsp;<small class="text-muted font-weight-normal" style="letter-spacing:0;">دریاؤں کا تازہ ترین بہاؤ</small></span>
+            <button id="reload_iframe" class="btn btn-sm btn-outline-secondary" style="font-size:.75rem; padding:2px 10px;">
+                <i class="bi bi-arrow-clockwise mr-1"></i>Reload
+            </button>
+        </div>
+        <iframe id="rivers_iframe"
+                src="https://ffd.pmd.gov.pk/river-state?zoom=6"
+                style="height:752px; width:100%; border:0; display:block;"
+                scrolling="no"></iframe>
+    </div>
+</div>
+
+
+<section id="maf-forecast" class="container mb-3 mt-0">
+    <div class="home-section-card">
+        <div class="section-header d-flex align-items-center justify-content-between">
+            <span class="section-title">
+                <i class="bi bi-droplet-half mr-1"></i>Storage Forecast — Tarbela &amp; Mangla
+            </span>
+            <a href="https://ffd.pmd.gov.pk/maf-forecast" style="font-size:.78rem; color:#1a73e8; font-weight:600; text-decoration:none;">
+                Full details <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+
+                
+        <div class="maf-season-strip">
+            <div class="d-flex align-items-center" style="gap:0;">
+                <span class="maf-season-badge">MAF Forecast — Tarbela &amp; Mangla</span>
+                <span class="maf-period">11 Jul – 20 Jul 2026</span>
+            </div>
+            <span class="maf-updated">Updated 10 Jul 2026</span>
+        </div>
+
+        
+        <div class="maf-dams-row">
+                                                <div class="maf-dam-card maf-near">
+                <div class="maf-dam-label">Tarbela</div>
+                <div class="maf-dam-value">
+                    4.6-4.8<span class="maf-unit"> MAF</span>
+                </div>
+                            </div>
+                                    <div class="maf-dam-card maf-near">
+                <div class="maf-dam-label">Mangla</div>
+                <div class="maf-dam-value">
+                    0.80-0.84<span class="maf-unit"> MAF</span>
+                </div>
+                            </div>
+                    </div>
+
+        
+            </div>
+</section>
+
+
+
+
+<section class="quicklinks-section" id="links">
+    <div class="container">
+
+        <div class="d-flex align-items-center mb-4">
+            <div style="width:4px; height:28px; background:#1a73e8; border-radius:2px; margin-right:12px;"></div>
+            <h2 class="mb-0" style="font-size:1.35rem; font-weight:800; color:#1a3a5c;">Quick Links</h2>
+        </div>
+
+        <div class="row">
+
+            
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="home-section-card h-100">
+                    <div class="section-header">
+                        <span class="section-title"><i class="bi bi-journal-text mr-1"></i>Publications</span>
+                    </div>
+                    <div class="p-3">
+                        <ul class="ql-list">
+                            <li><a href="https://ffd.pmd.gov.pk/bulletin/bulletin"><i class="bi bi-chevron-right"></i>Flood Bulletins</a></li>
+                            <li><a href="https://ffd.pmd.gov.pk/bulletin/advisory"><i class="bi bi-chevron-right"></i>Flood Advisories</a></li>
+                                                        <li><a href="https://ffd.pmd.gov.pk/flood-reports"><i class="bi bi-chevron-right"></i>Annual Flood Reports</a></li>
+                                                    </ul>
+
+                        <div class="ql-group-heading">Archive</div>
+                        <ul class="ql-list">
+                                                        <li><a href="https://ffd.pmd.gov.pk/bulletins/archive"><i class="bi bi-chevron-right"></i>Historical Bulletins</a></li>
+                                                        <li><a href="https://ffd.pmd.gov.pk/historical-peaks"><i class="bi bi-chevron-right"></i>Historical Peaks</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="home-section-card h-100">
+                    <div class="section-header">
+                        <span class="section-title"><i class="bi bi-broadcast mr-1"></i>Radar &amp; Imagery</span>
+                    </div>
+                    <div class="p-3">
+                        <div class="ql-group-heading">Real-Time Data</div>
+                        <ul class="ql-list">
+                            <li>
+                                <a href="http://faws.pmd.gov.pk/" target="_blank">
+                                    <i class="bi bi-chevron-right"></i>Real-Time FAWS
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://ffd.pmd.gov.pk/depression-tracks">
+                                    <i class="bi bi-chevron-right"></i>Depression / Track
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://ffd.pmd.gov.pk/pollen">
+                                    <i class="bi bi-chevron-right"></i>Pollen Count — Lahore
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="home-section-card h-100">
+                    <div class="section-header">
+                        <span class="section-title"><i class="bi bi-calendar3 mr-1"></i>Forecasts &amp; Tools</span>
+                    </div>
+                    <div class="p-3">
+                        <ul class="ql-list">
+                            <li>
+                                                                <a href="#" data-image-viewer
+                                   data-img="https://ffd.pmd.gov.pk/file/f6559d04-b599-436b-a076-58ebd2d04f09/view"
+                                   data-download="https://ffd.pmd.gov.pk/file/f6559d04-b599-436b-a076-58ebd2d04f09/download"
+                                   data-title="Rabi Seasonal Forecast"
+                                   data-updated="22 Apr 2026">
+                                    <i class="bi bi-chevron-right"></i>Rabi Forecast
+                                </a>
+                                                            </li>
+                            <li>
+                                                                <a href="#" data-image-viewer
+                                   data-img="https://ffd.pmd.gov.pk/file/bdcba49b-db31-402f-83bf-c9e633d28c71/view"
+                                   data-download="https://ffd.pmd.gov.pk/file/bdcba49b-db31-402f-83bf-c9e633d28c71/download"
+                                   data-title="Kharif Seasonal Forecast"
+                                   data-updated="02 Jun 2026">
+                                    <i class="bi bi-chevron-right"></i>Kharif Forecast
+                                </a>
+                                                            </li>
+                            <li>
+                                <a href="#maf-forecast">
+                                    <i class="bi bi-chevron-right"></i>MAF Forecast (DAMs)
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://ffd.pmd.gov.pk/meteograms">
+                                    <i class="bi bi-chevron-right"></i>Meteograms — 10-Day Charts
+                                </a>
+                            </li>
+                        </ul>
+
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="home-section-card h-100">
+                    <div class="section-header">
+                        <span class="section-title"><i class="bi bi-folder2-open mr-1"></i>Resources</span>
+                    </div>
+                    <div class="p-3">
+                        <ul class="ql-list">
+                            <li>
+                                                                    <a href="#" data-image-viewer
+                                       data-img="https://ffd.pmd.gov.pk/file/16f950d2-9971-4381-8410-e1de95a4ec63/view"
+                                       data-download="https://ffd.pmd.gov.pk/file/16f950d2-9971-4381-8410-e1de95a4ec63/download"
+                                       data-title="Flood Routing Model"
+                                       data-updated="22 Apr 2026">
+                                        <i class="bi bi-chevron-right"></i>Flood Routing Model
+                                    </a>
+                                
+
+                            </li>
+                            <li>
+
+                                                                    <a href="#" data-image-viewer
+                                       data-img="https://ffd.pmd.gov.pk/file/4e8c6dab-0730-4210-b66b-36ad4e635b84/view"
+                                       data-download="https://ffd.pmd.gov.pk/file/4e8c6dab-0730-4210-b66b-36ad4e635b84/download"
+                                       data-title="Telemetric Stations"
+                                       data-updated="22 Apr 2026">
+                                        <i class="bi bi-chevron-right"></i>Telemetric Stations
+                                    </a>
+                                
+                            </li>
+                            <li>
+                                <a href="https://ffd.pmd.gov.pk/ffd_others/indusbasin.gif" target="_blank">
+                                    <i class="bi bi-chevron-right"></i>Map — Indus Basin
+                                </a>
+                            </li>
+                            <li>
+
+                                                                    <a href="#" data-image-viewer
+                                       data-img="https://ffd.pmd.gov.pk/file/02f149bf-9b7e-4acf-8d74-f109cab3e181/view"
+                                       data-download="https://ffd.pmd.gov.pk/file/02f149bf-9b7e-4acf-8d74-f109cab3e181/download"
+                                       data-title="Organogram"
+                                       data-updated="22 Apr 2026">
+                                        <i class="bi bi-chevron-right"></i>Organogram
+                                    </a>
+                                
+                            </li>
+                            <li>
+
+                                                                    <a href="#" data-image-viewer
+                                       data-img="https://ffd.pmd.gov.pk/file/46f7408d-2e71-47d4-90b7-668b992700ee/view"
+                                       data-download="https://ffd.pmd.gov.pk/file/46f7408d-2e71-47d4-90b7-668b992700ee/download"
+                                       data-title="Data Dissemination Chart"
+                                       data-updated="22 Apr 2026">
+                                        <i class="bi bi-chevron-right"></i>Data Dissemination Chart
+                                    </a>
+                                
+                            </li>
+                            <li>
+                                <a href="https://ffd.pmd.gov.pk/flood-limits">
+                                    <i class="bi bi-chevron-right"></i>Flood Limits
+                                </a>
+                            </li>
+                        </ul>
+
+                        <div class="ql-group-heading">Data Submission</div>
+                        <ul class="ql-list">
+                            <li>
+                                <a href="https://ffd.pmd.gov.pk/met-data-feed">
+                                    <i class="bi bi-chevron-right"></i>Submit Weather Data
+                                    <span class="badge badge-warning ml-1" style="font-size:.65rem;">Experimental</span>
+                                </a>
+                            </li>
+                        </ul>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<section class="newsletter-section" id="newsletter">
+    <div class="container">
+        <div class="row align-items-center">
+
+            
+            <div class="col-lg-4 mb-4 mb-lg-0 text-lg-left text-center">
+                <h2>Stay Informed</h2>
+                <p class="mb-4">Receive flood bulletins and advisories directly in your inbox during flood season.</p>
+
+                <div class="newsletter-benefit">
+                    <i class="bi bi-bell-fill"></i>
+                    <span>Instant alerts when advisories are issued</span>
+                </div>
+                <div class="newsletter-benefit">
+                    <i class="bi bi-file-earmark-text-fill"></i>
+                    <span>Seasonal bulletins delivered to your inbox</span>
+                </div>
+                <div class="newsletter-benefit">
+                    <i class="bi bi-shield-check-fill"></i>
+                    <span>Official information from FFD, Lahore</span>
+                </div>
+            </div>
+
+            
+            <div class="col-lg-8">
+                <div class="newsletter-card">
+                    <h5 class="text-white font-weight-700 mb-3" style="font-weight:700;">
+                        <i class="bi bi-envelope-paper-fill mr-2" style="color:#4db6ac;"></i>Subscribe to Newsletter
+                    </h5>
+
+                    <form action="https://ffd.pmd.gov.pk/subscribe" method="POST">
+                        <input type="hidden" name="_token" value="HtZ7C0ifl0IwW4d4yVoQ4WpRRbclQUTT1TCvkB2P" autocomplete="off">                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label>Your Name</label>
+                                <input name="name" type="text" required
+                                       class="form-control "
+                                       placeholder="Full Name"
+                                       value="">
+                                                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label>Email Address</label>
+                                <input name="email" type="email" required
+                                       class="form-control "
+                                       placeholder="you@example.com"
+                                       value="">
+                                                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label>Designation / Organization <small style="opacity:.6;">(optional)</small></label>
+                                <input name="detail" type="text" maxlength="500"
+                                       class="form-control"
+                                       placeholder="e.g. Engineer, NDMA"
+                                       value="">
+                            </div>
+                        </div>
+                                                <div class="mb-3">
+                            <div class="h-captcha" data-sitekey="fb64c4a0-9280-44e6-ab80-b832c54604b6" data-theme="dark"></div>
+                                                    </div>
+                                                <div class="text-center mt-2">
+                            <button type="submit" class="btn btn-subscribe">
+                                <i class="bi bi-envelope-check mr-2"></i>Subscribe Now
+                            </button>
+                            <p class="mt-2 mb-0" style="font-size:.75rem; color:rgba(255,255,255,.45);">
+                                You can unsubscribe at any time. We respect your privacy.
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<div id="ffd-push-popup" role="dialog" aria-label="Enable flood alerts" hidden>
+    <button type="button" class="ffd-pp-close" data-ffd-push="close" aria-label="Close">&times;</button>
+    <div class="ffd-pp-row">
+        <i class="bi bi-bell-fill ffd-pp-ico"></i>
+        <div>
+            <span class="ffd-pp-title">Get flood alerts</span>
+            <p class="ffd-pp-text" data-ffd-push="text">
+                Enable notifications to get flood bulletins &amp; advisories the moment they're issued.
+            </p>
+        </div>
+    </div>
+    <div class="ffd-pp-actions">
+        <button type="button" class="ffd-pp-enable" data-ffd-push="enable">
+            <i class="bi bi-bell mr-1"></i>Enable
+        </button>
+        <button type="button" class="ffd-pp-never" data-ffd-push="never">Never</button>
+    </div>
+</div>
+
+
+
+
+<div class="modal fade" id="latestUpdateModal" tabindex="-1" role="dialog" aria-labelledby="latestUpdateModalLabel" aria-hidden="true"
+     data-card-url="/notifications/205/card"
+     data-seen-key="ffd_update_seen_205">
+    <div class="modal-dialog modal-dialog-centered" role="document" style="max-width:540px;">
+        <div class="modal-content" style="border:none; border-radius:14px; overflow:hidden;">
+            <div class="modal-header d-flex align-items-center" style="background:linear-gradient(135deg, #0f2942, #155e75); border:none; padding:.6rem 1rem;">
+                <h6 class="modal-title text-white mb-0 mr-auto" id="latestUpdateModalLabel">
+                    <i class="bi bi-megaphone-fill mr-2"></i>Latest Update
+                </h6>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:.85;"><span>&times;</span></button>
+            </div>
+            <iframe title="Latest update" style="width:100%; height:70vh; border:0; background:#e9ecef; display:block;"></iframe>
+            <div class="modal-footer d-flex align-items-center" style="padding:.55rem 1rem;">
+                <span class="text-muted small mr-auto"><i class="bi bi-clock mr-1"></i>43 minutes ago</span>
+                <button type="button" class="btn btn-sm btn-outline-danger latest-like mr-2"
+                        data-like-btn data-id="205" data-liked="0"
+                        aria-pressed="false">
+                    <i class="bi bi-heart"></i>
+                    <span class="like-label">Like</span>
+                    <span class="like-count">2</span>
+                </button>
+                <a href="https://ffd.pmd.gov.pk/notifications" class="btn btn-sm btn-primary">
+                    <i class="bi bi-bell mr-1"></i>See all notifications
+                </a>
+            </div>
+            <style>#latestUpdateModal .latest-like.liked, #latestUpdateModal .latest-like.liked:hover { background:#e0245e; border-color:#e0245e; color:#fff; } #latestUpdateModal .latest-like .like-count { margin-left:5px; font-weight:700; }</style>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="imageViewerModal" tabindex="-1" role="dialog"
+     aria-labelledby="imageViewerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+        <div class="modal-content" style="border:none;">
+            <div class="modal-header py-2 px-4" style="background:#1a3a5c; border-radius:0;">
+                <h6 class="modal-title text-white font-weight-bold mb-0" id="imageViewerModalLabel">
+                    <i class="bi bi-image mr-2" id="iv-icon"></i>
+                    <span id="iv-title">Image</span>
+                </h6>
+                <div class="d-flex align-items-center ml-auto">
+                    <small class="text-white-50 mr-3" id="iv-updated"></small>
+                    <a id="iv-download-btn" href="#" target="_blank"
+                       class="btn btn-sm btn-outline-light mr-3" style="font-size:12px;">
+                        <i class="bi bi-download mr-1"></i>Download
+                    </a>
+                    <button type="button" class="close text-white" data-dismiss="modal"
+                            aria-label="Close" style="opacity:.8; margin-top:-2px;">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="modal-body p-0 text-center"
+                 style="background:#111; min-height:320px; position:relative;">
+
+                
+                <div id="iv-state-loading"
+                     style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+                            color:#fff;font-size:13px;white-space:nowrap;">
+                    <div class="spinner-border spinner-border-sm mr-2" role="status"></div>
+                    Loading…
+                </div>
+
+                
+                <div id="iv-state-error"
+                     style="display:none;position:absolute;top:50%;left:50%;
+                            transform:translate(-50%,-50%);color:#fff;text-align:center;width:280px;">
+                    <i class="bi bi-exclamation-triangle"
+                       style="font-size:2.2rem;color:#f87171;display:block;margin-bottom:10px;"></i>
+                    <p id="iv-error-msg"
+                       style="font-size:13px;margin-bottom:14px;color:#fca5a5;line-height:1.5;">
+                        Failed to load image.
+                    </p>
+                    <button id="iv-retry-btn" class="btn btn-sm btn-outline-light">
+                        <i class="bi bi-arrow-clockwise mr-1"></i>Retry
+                    </button>
+                </div>
+
+                
+                <img id="iv-img" src="" alt=""
+                     style="max-width:100%; max-height:82vh; display:none; margin:0 auto;">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- ── Footer ────────────────────────────────────────────────────── -->
+<footer id="footer">
+    <div class="container">
+        <div class="d-flex flex-wrap justify-content-between align-items-center" style="gap:8px;">
+            <span>&copy; 2026 <strong>Flood Forecasting Division (FFD), Lahore</strong> — Pakistan Meteorological Department</span>
+            <span>
+                <a href="https://ffd.pmd.gov.pk/about">About</a> &nbsp;&middot;&nbsp;
+                <a href="https://ffd.pmd.gov.pk/contact-us">Contact</a> &nbsp;&middot;&nbsp;
+                <a href="https://ffd.pmd.gov.pk/address-book">Address Book</a>
+            </span>
+            <span>Dev: <a href="#">Usman Ali</a></span>
+        </div>
+    </div>
+</footer>
+
+
+<!-- ── Scripts ───────────────────────────────────────────────────── -->
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+
+<script>
+    // Auto-dismiss alerts after 7s
+    window.setTimeout(function () {
+        $(".alert").fadeTo(500, 0).slideUp(400, function () { $(this).remove(); });
+    }, 7000);
+
+    // Mobile nav toggle
+    $('#mobileNavToggle').on('click', function () {
+        var $nav = $('#mobile-nav');
+        var $icon = $(this).find('i');
+        $nav.slideToggle(200);
+        $icon.toggleClass('bi-list bi-x-lg');
+    });
+
+    </script>
+
+<style>
+        /* Homepage opt-in popup — bottom-corner slide-in card (no backdrop). */
+        #ffd-push-popup {
+            position: fixed;
+            right: 18px;
+            bottom: 18px;
+            z-index: 2147483000;
+            width: 330px;
+            max-width: calc(100vw - 36px);
+            background: #fff;
+            color: #13243a;
+            border: 1px solid rgba(0, 0, 0, .06);
+            border-radius: 12px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, .22);
+            padding: 16px 16px 14px;
+            font-family: inherit;
+            transform: translateY(140%);
+            opacity: 0;
+            transition: transform .35s cubic-bezier(.2, .8, .2, 1), opacity .35s ease;
+        }
+        #ffd-push-popup.ffd-pp-in { transform: translateY(0); opacity: 1; }
+        #ffd-push-popup .ffd-pp-close {
+            position: absolute;
+            top: 7px;
+            right: 11px;
+            border: 0;
+            background: transparent;
+            font-size: 1.3rem;
+            line-height: 1;
+            color: #94a3b8;
+            cursor: pointer;
+        }
+        #ffd-push-popup .ffd-pp-close:hover { color: #475569; }
+        #ffd-push-popup .ffd-pp-row { display: flex; gap: 12px; align-items: flex-start; }
+        #ffd-push-popup .ffd-pp-ico { font-size: 1.7rem; color: #0d9488; margin-top: 1px; flex-shrink: 0; }
+        #ffd-push-popup .ffd-pp-title { display: block; font-size: 1rem; font-weight: 700; margin-bottom: 2px; }
+        #ffd-push-popup .ffd-pp-text { margin: 0; font-size: .84rem; color: #475569; line-height: 1.4; }
+        #ffd-push-popup .ffd-pp-actions { display: flex; align-items: center; gap: 10px; margin-top: 13px; }
+        #ffd-push-popup .ffd-pp-enable {
+            background: linear-gradient(135deg, #0ea5a4, #0d9488);
+            color: #fff;
+            border: 0;
+            border-radius: 8px;
+            padding: 8px 18px;
+            font-weight: 700;
+            font-size: .85rem;
+            cursor: pointer;
+        }
+        #ffd-push-popup .ffd-pp-enable:hover { filter: brightness(1.06); }
+        #ffd-push-popup .ffd-pp-never {
+            background: transparent;
+            border: 0;
+            color: #64748b;
+            font-size: .8rem;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        #ffd-push-popup .ffd-pp-never:hover { color: #334155; }
+        @media (max-width: 480px) {
+            #ffd-push-popup { right: 10px; left: 10px; bottom: 10px; width: auto; }
+        }
+    </style>
+    <script>
+        window.FFD_FCM = {
+            config: {
+                apiKey: "AIzaSyBj33YvE6uwKRGvDApkUZAYQgJKSrib0Ug",
+                authDomain: "ffd-web-app.firebaseapp.com",
+                projectId: "ffd-web-app",
+                messagingSenderId: "292615105742",
+                appId: "1:292615105742:web:23acac94e2a7a0c0d2749f"            },
+            vapidKey: "BP9uZIBUHIr5h79aCa-eXnApzzrjlHv7bX_VIv-wzcSRatRz-usb1LoMUAviJ8Jo0N_M_KrAMQwQuy-gnEGgF2Q",
+            
+            swPath: "\/firebase-messaging-sw.js",
+            endpoints: {
+                register: "\/api\/app\/v1\/devices",
+                heartbeat: "\/api\/app\/v1\/devices\/heartbeat",
+                unregister: "\/api\/app\/v1\/devices"            }
+        };
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
+    <script src="https://ffd.pmd.gov.pk/js/web-push.js?v=1782590757" defer></script>
+
+<script>
+(function () {
+    var _currentUrl = null;
+
+    function loadImage(url) {
+        var $img     = $('#iv-img');
+        var $loading = $('#iv-state-loading');
+        var $error   = $('#iv-state-error');
+
+        $img.hide();
+        $error.hide();
+        $loading.show();
+        $img.off('load error').attr('src', '');
+
+        $img.on('load', function () {
+            $loading.hide();
+            $img.show();
+        }).on('error', function () {
+            $loading.hide();
+            $('#iv-error-msg').text(
+                'Could not load the image. The file may be unavailable or access is restricted.'
+            );
+            $error.show();
+        });
+
+        $img.attr('src', url + (url.indexOf('?') === -1 ? '?' : '&') + '_t=' + Date.now());
+    }
+
+    function open(opts) {
+        _currentUrl = opts.img || null;
+        $('#iv-title').text(opts.title || 'Image');
+        $('#iv-updated').text(opts.updated ? 'Updated: ' + opts.updated : '');
+        $('#iv-download-btn').attr('href', opts.download || '#');
+        if (_currentUrl) {
+            loadImage(_currentUrl);
+        } else {
+            $('#iv-state-loading').hide();
+            $('#iv-error-msg').text('No file is available for this item.');
+            $('#iv-state-error').show();
+        }
+        $('#imageViewerModal').modal('show');
+    }
+
+    // Delegated trigger — works for elements added after page load
+    $(document).on('click', '[data-image-viewer]', function (e) {
+        e.preventDefault();
+        open({
+            img:      $(this).data('img'),
+            download: $(this).data('download'),
+            title:    $(this).data('title'),
+            updated:  $(this).data('updated'),
+        });
+    });
+
+    // Retry button
+    $(document).on('click', '#iv-retry-btn', function () {
+        if (_currentUrl) loadImage(_currentUrl);
+    });
+
+    // Reset on close
+    $('#imageViewerModal').on('hidden.bs.modal', function () {
+        $('#iv-img').hide().attr('src', '');
+        $('#iv-state-loading').show();
+        $('#iv-state-error').hide();
+        _currentUrl = null;
+    });
+
+    // Public API
+    window.ImageViewer = { open: open };
+})();
+</script>
+<script>
+window.FFDNotifEngage = (function () {
+    var AUTHED = false;
+    var LOGIN_URL = "https:\/\/ffd.pmd.gov.pk\/login";
+    var meta = document.querySelector('meta[name="csrf-token"]');
+    var CSRF = meta ? meta.getAttribute('content') : '';
+    // Route templates with a placeholder id we swap per card (binding is by id).
+    var READ_TPL = "https:\/\/ffd.pmd.gov.pk\/notifications\/__ID__\/read";
+    var LIKE_TPL = "https:\/\/ffd.pmd.gov.pk\/notifications\/__ID__\/like";
+
+    function url(tpl, id) { return tpl.replace('__ID__', encodeURIComponent(id)); }
+
+    function toast(msg) {
+        var t = document.getElementById('ffdToast');
+        if (!t) {
+            t = document.createElement('div'); t.id = 'ffdToast';
+            t.style.cssText = 'position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#0f2942;color:#fff;padding:9px 18px;border-radius:20px;font-size:.85rem;z-index:2000;box-shadow:0 6px 20px rgba(0,0,0,.25);opacity:0;transition:opacity .2s;pointer-events:none;';
+            document.body.appendChild(t);
+        }
+        t.textContent = msg; t.style.opacity = '1';
+        clearTimeout(t._h); t._h = setTimeout(function () { t.style.opacity = '0'; }, 1700);
+    }
+
+    var readSent = {};
+    function recordRead(id) {
+        if (!id || readSent[id]) { return; }
+        readSent[id] = true;
+        try {
+            fetch(url(READ_TPL, id), {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
+                credentials: 'same-origin',
+                keepalive: true,
+            }).catch(function () {});
+        } catch (e) { /* best-effort */ }
+    }
+
+    function applyLikeState(btn, liked, count) {
+        btn.dataset.liked = liked ? '1' : '0';
+        btn.classList.toggle('liked', liked);
+        btn.setAttribute('aria-pressed', liked ? 'true' : 'false');
+        var icon = btn.querySelector('i');
+        if (icon) { icon.className = 'bi bi-heart' + (liked ? '-fill' : ''); }
+        if (typeof count === 'number') {
+            var c = btn.querySelector('.like-count');
+            if (c) { c.textContent = count; }
+        }
+        var lbl = btn.querySelector('.like-label');
+        if (lbl) { lbl.textContent = liked ? 'Liked' : 'Like'; }
+    }
+
+    // Update every like button for this update at once — a card in the grid and the
+    // same update's popup button stay in step.
+    function syncAll(id, liked, count) {
+        document.querySelectorAll('[data-like-btn]').forEach(function (b) {
+            if (String(b.dataset.id) === String(id)) { applyLikeState(b, liked, count); }
+        });
+    }
+
+    // Point a (popup) like button at a specific update + prime its visual state.
+    function sync(btn, id, liked, count) {
+        if (!btn) { return; }
+        btn.dataset.id = id;
+        applyLikeState(btn, !!liked, typeof count === 'number' ? count : parseInt(count, 10) || 0);
+    }
+
+    function toggleLike(btn) {
+        if (!AUTHED) {
+            toast('Please sign in to like this update');
+            setTimeout(function () { window.location.href = LOGIN_URL; }, 900);
+            return;
+        }
+        if (btn.disabled) { return; }
+        var id = btn.dataset.id;
+        var liked = btn.dataset.liked === '1';
+        btn.disabled = true;
+        fetch(url(LIKE_TPL, id), {
+            method: liked ? 'DELETE' : 'POST',
+            headers: { 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
+            credentials: 'same-origin',
+        }).then(function (r) { return r.ok ? r.json() : Promise.reject(r); })
+          .then(function (data) { syncAll(id, !!data.liked, data.likes_count); })
+          .catch(function () { toast('Could not update your like — please try again'); })
+          .finally(function () { btn.disabled = false; });
+    }
+
+    function bind(root) {
+        (root || document).querySelectorAll('[data-like-btn]').forEach(function (btn) {
+            if (btn._ffdBound) { return; }
+            btn._ffdBound = true;
+            btn.addEventListener('click', function (e) { e.stopPropagation(); e.preventDefault(); toggleLike(btn); });
+            // Keep the button's own keyboard activation from bubbling to a card that
+            // opens a modal on Enter/Space.
+            btn.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); }
+            });
+        });
+    }
+
+    return { recordRead: recordRead, toggleLike: toggleLike, bind: bind, sync: sync, AUTHED: AUTHED };
+})();
+</script>
+<script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+<script src="https://cdn.jsdelivr.net/npm/owl.carousel@2.3.4/dist/owl.carousel.min.js"></script>
+<script>
+$(document).ready(function () {
+
+    // Reload iframe
+    $('#reload_iframe').click(function () {
+        $('#rivers_iframe').attr('src', function (i, val) { return val; });
+    });
+
+    // Weather carousel
+    $(".owl-carousel").owlCarousel({
+        responsive: { 0: { items: 1 }, 600: { items: 3 }, 1000: { items: 5 } },
+        autoplay: true,
+        autoplayHoverPause: true,
+        slideTransition: 'linear',
+        autoplayTimeout: 1200,
+        autoplaySpeed: 400,
+        loop: true,
+        nav: false,
+        dots: false
+    });
+
+    // Tooltips
+    $('[data-toggle="tooltip"]').tooltip();
+
+    // Homepage alert modal
+    (function () {
+        var $modal = $('#alertModal');
+        if (!$modal.length) { return; }
+
+        var frequency  = $modal.data('frequency');
+        var cookieKey  = $modal.data('cookie-key');
+        var duration   = parseInt($modal.data('duration'), 10) || 0;
+
+        function shouldShow() {
+            if (frequency === 'always') { return true; }
+            if (frequency === 'once_per_day') {
+                return $.cookie(cookieKey) !== 'seen';
+            }
+            // once_per_session: use sessionStorage
+            return !sessionStorage.getItem(cookieKey);
+        }
+
+        function markSeen() {
+            if (frequency === 'once_per_day') {
+                $.cookie(cookieKey, 'seen', { expires: 1, path: '/' });
+            } else if (frequency === 'once_per_session') {
+                sessionStorage.setItem(cookieKey, '1');
+            }
+        }
+
+        if (shouldShow()) {
+            $modal.modal('show');
+            markSeen();
+
+            if (duration > 0) {
+                var remaining = duration;
+                var $cd = $('#alertCountdown');
+                var timer = setInterval(function () {
+                    remaining--;
+                    $cd.text(remaining);
+                    if (remaining <= 0) {
+                        clearInterval(timer);
+                        $modal.modal('hide');
+                    }
+                }, 1000);
+                $modal.on('hidden.bs.modal', function () { clearInterval(timer); });
+            }
+        }
+    }());
+
+    // Latest-update fallback dialog (rendered only when no site alert is active).
+    // The iframe src is set here, not in the markup, so sessions that already saw
+    // this update never fetch the card.
+    (function () {
+        var $modal = $('#latestUpdateModal');
+        if (!$modal.length) { return; }
+
+        var seenKey = $modal.data('seen-key');
+        try { if (sessionStorage.getItem(seenKey)) { return; } } catch (e) {}
+
+        $modal.find('iframe').attr('src', $modal.data('card-url'));
+        $modal.modal('show');
+        try { sessionStorage.setItem(seenKey, '1'); } catch (e) {}
+
+        // Wire the popup's Like button + count showing it as a read.
+        if (window.FFDNotifEngage) {
+            var likeBtn = $modal.find('[data-like-btn]').get(0);
+            FFDNotifEngage.bind($modal.get(0));
+            if (likeBtn) { FFDNotifEngage.recordRead(likeBtn.dataset.id); }
+        }
+    }());
+
+    // Pinned update card. Only the Like button is wired — deliberately no read
+    // beacon: the card sits on the homepage permanently, so counting a read per
+    // page load would drown the real open-rate from the feed and share pages.
+    (function () {
+        var card = document.querySelector('.pinned-update');
+        if (card && window.FFDNotifEngage) { FFDNotifEngage.bind(card); }
+    }());
+});
+</script>
+
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-VX3MXJBGL0"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-VX3MXJBGL0');
+</script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1eb110afde9412b',t:'MTc4NDY0NTkzNQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
