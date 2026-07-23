@@ -7,6 +7,7 @@ export interface StationHealthRow {
   valley: string | null
   district_id: string | null
   district_name: string | null
+  district_name_ur?: string | null
   source: string
   is_simulated: boolean
   status: StationStatus
@@ -38,9 +39,9 @@ export function statusBadgeClass(status: string): string {
   return 'bg-[var(--color-emergency)]/15 text-[var(--color-emergency)]'
 }
 
-export function formatPkt(iso: string | null): string {
-  if (!iso) return 'Never'
-  return new Date(iso).toLocaleString('en-GB', {
+export function formatPkt(iso: string | null, locale: string = 'en'): string {
+  if (!iso) return locale === 'ur' ? 'کبھی نہیں' : 'Never'
+  return new Date(iso).toLocaleString(locale === 'ur' ? 'ur-PK' : 'en-GB', {
     timeZone: 'Asia/Karachi',
     day: '2-digit',
     month: 'short',

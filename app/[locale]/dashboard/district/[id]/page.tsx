@@ -1,11 +1,18 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 
 import PmdFfdPanel from './PmdFfdPanel'
 import { formatPkt, hazardIcon, riskLevelClass, severityBadgeClass } from '@/lib/hazard-console'
 import { statusBadgeClass, formatPkt as formatPktStation } from '@/lib/station-health'
 import { type AppRole } from '@/lib/alert-workflow'
+import {
+  dataLabel,
+  districtDisplayName,
+  localizeAlertFields,
+  provinceDisplayName,
+} from '@/lib/localized'
 
 type HazardRow = {
   id: string
@@ -22,6 +29,8 @@ export default async function DistrictConsolePage({
   params: Promise<{ locale: string; id: string }>
 }) {
   const { locale, id } = await params
+  const td = await getTranslations('Data')
+  const tc = await getTranslations('Common')
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect(`/${locale}/login`)
@@ -34,7 +43,7 @@ export default async function DistrictConsolePage({
 
   const { data: district } = await supabase
     .from('district')
-    .select('id, name_en, province, adm2_code, population')
+    .select('id, name_en, name_ur, province, adm2_code, population')
     .eq('id', id)
     .single()
   if (!district) notFound()
@@ -65,7 +74,7 @@ export default async function DistrictConsolePage({
     supabase.rpc('get_district_hazards', { p_district_id: id, p_limit: 20 }) as unknown as Promise<{ data: HazardRow[] | null }>,
     supabase.from('flood_forecast').select('*').eq('district_id', id).gte('forecast_date', today).order('forecast_date').limit(7),
     supabase.from('drought_index').select('spi_3, date').eq('district_id', id).order('date', { ascending: false }).limit(1).maybeSingle(),
-    supabase.from('alert_candidate').select('id, title, severity, status, issued_at, event_en').eq('district_id', id).eq('status', 'issued').order('issued_at', { ascending: false }),
+    supabase.from('alert_candidate').select('id, title, severity, status, issued_at, event_en, event_ur, headline_en, headline_ur').eq('district_id', id).eq('status', 'issued').order('issued_at', { ascending: false }),
     supabase.from('pmd_forecasts').select('warning_level, forecast_text, rivers, fetched_at, bulletin_id, source_url, matched_by_date').order('fetched_at', { ascending: false }).limit(1).maybeSingle(),
     supabase.from('reservoir_reading').select('*').order('reading_date', { ascending: false }).limit(3),
     supabase.from('station').select('id, name, kind, valley, source, is_simulated').eq('district_id', id).order('name'),
@@ -103,23 +112,28 @@ export default async function DistrictConsolePage({
   const sectionClass = 'rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-5'
   const headingClass = 'mb-3 text-sm font-semibold uppercase tracking-wide text-[var(--color-ink)]/60'
 
+  const districtName = districtDisplayName(locale, district.name_en, district.name_ur)
+  const provinceName = provinceDisplayName(locale, district.province)
+
   return (
     <div className="min-h-screen bg-[var(--color-base)]">
       <header className="border-b border-[var(--color-border)] bg-[var(--color-primary)] px-6 py-4">
         <Link href={`/${locale}/dashboard`} className="text-sm text-white/70 hover:text-white">
-          ← Provincial Overview
+          {tc('backToOverview')}
         </Link>
-        <h1 className="mt-1 text-xl font-semibold text-white">{district.name_en}</h1>
+        <h1 className="mt-1 text-xl font-semibold text-white">{districtName}</h1>
         <p className="text-sm text-white/70">
-          {district.province} · {district.adm2_code}
-          {district.population ? ` · Pop. ${district.population.toLocaleString()}` : ''}
+          {provinceName} · {district.adm2_code}
+          {district.population
+            ? ` · ${td('district.population', { count: district.population.toLocaleString(locale === 'ur' ? 'ur-PK' : 'en-GB') })}`
+            : ''}
         </p>
       </header>
 
       <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-2">
         {/* Weather strip */}
         <section className={sectionClass}>
-          <h2 className={headingClass}>Weather (Open-Meteo)</h2>
+          <h2 className={headingClass}>{td('district.weather')} (Open-Meteo)</h2>
           {weather ? (
             <div className="grid grid-cols-3 gap-4 font-mono text-sm">
               <div>
@@ -135,7 +149,7 @@ export default async function DistrictConsolePage({
                 <p className="text-lg">{weather.snowfall ?? '—'} cm</p>
               </div>
               <p className="col-span-3 text-xs text-[var(--color-ink)]/40">
-                Updated {formatPkt(weather.fetched_at)} PKT
+                {formatPkt(weather.fetched_at, locale)} {td('feeds.pkt')}
               </p>
             </div>
           ) : (
@@ -159,7 +173,7 @@ export default async function DistrictConsolePage({
                   <p>
                     Risk:{' '}
                     <span className={`font-mono font-semibold uppercase ${riskLevelClass(latestFlood.risk_level)}`}>
-                      {latestFlood.risk_level}
+                      {dataLabel(td, 'risk', latestFlood.risk_level)}
                     </span>
                   </p>
                   <p className="font-mono text-xs text-[var(--color-ink)]/70">
@@ -175,7 +189,7 @@ export default async function DistrictConsolePage({
               <h3 className="mb-2 text-[10px] font-bold uppercase tracking-wide text-[var(--color-primary)]">
                 PMD FFD (credibility source)
               </h3>
-              <PmdFfdPanel districtName={district.name_en} pmd={pmd} />
+              <PmdFfdPanel districtName={districtName} pmd={pmd} />
             </div>
 
             <div className="rounded border border-[var(--color-border)] bg-white p-4">
@@ -200,7 +214,7 @@ export default async function DistrictConsolePage({
 
         {/* Field stations */}
         <section className={sectionClass}>
-          <h2 className={headingClass}>Field Stations ({districtStations?.length ?? 0})</h2>
+          <h2 className={headingClass}>{td('district.stations')} ({districtStations?.length ?? 0})</h2>
           {districtStations && districtStations.length > 0 ? (
             <div className="max-h-48 space-y-2 overflow-y-auto">
               {districtStations.map((s) => {
@@ -210,13 +224,13 @@ export default async function DistrictConsolePage({
                     <div>
                       <p>{s.name}</p>
                       <p className="text-xs text-[var(--color-ink)]/50">
-                        {s.valley ?? s.kind} · {s.is_simulated ? 'simulated' : s.source}
+                        {s.valley ?? s.kind} · {s.is_simulated ? dataLabel(td, 'stationKind', 'simulated') : s.source}
                       </p>
                     </div>
                     {h && (
                       <div className="text-right">
                         <span className={`rounded-full px-2 py-0.5 text-[10px] font-mono uppercase ${statusBadgeClass(h.status)}`}>
-                          {h.status}
+                          {dataLabel(td, 'status', h.status)}
                         </span>
                         <p className="mt-1 font-mono text-[10px] text-[var(--color-ink)]/40">
                           {formatPktStation(h.last_transmission_at)}
@@ -228,65 +242,68 @@ export default async function DistrictConsolePage({
               })}
             </div>
           ) : (
-            <p className="text-sm text-[var(--color-ink)]/50">No stations registered in this district.</p>
+            <p className="text-sm text-[var(--color-ink)]/50">{td('district.noStations')}</p>
           )}
         </section>
 
         {/* Active alerts */}
         <section className={sectionClass}>
-          <h2 className={headingClass}>Active Alerts</h2>
+          <h2 className={headingClass}>{td('district.activeAlerts')}</h2>
           {activeAlerts && activeAlerts.length > 0 ? (
             <div className="space-y-2">
-              {activeAlerts.map((a) => (
+              {activeAlerts.map((a) => {
+                const text = localizeAlertFields(locale, a)
+                return (
                 <Link
                   key={a.id}
                   href={`/${locale}/dashboard/alerts/${a.id}`}
                   className="flex items-center justify-between rounded border border-[var(--color-border)] p-2 text-sm hover:bg-[var(--color-base)]"
                 >
-                  <span>{a.event_en ?? a.title}</span>
+                  <span>{text.event}</span>
                   <span className={`rounded-full px-2 py-0.5 text-xs font-mono uppercase ${severityBadgeClass(a.severity)}`}>
-                    {a.severity}
+                    {dataLabel(td, 'severity', a.severity)}
                   </span>
                 </Link>
-              ))}
+                )
+              })}
             </div>
           ) : (
-            <p className="text-sm text-[var(--color-ink)]/50">No issued alerts for this district.</p>
+            <p className="text-sm text-[var(--color-ink)]/50">{td('district.noActiveAlerts')}</p>
           )}
         </section>
 
         {/* Active hazards */}
         <section className={sectionClass}>
-          <h2 className={headingClass}>Active Hazards (50 km)</h2>
+          <h2 className={headingClass}>{td('district.activeHazards')} (50 km)</h2>
           {activeHazards.length > 0 ? (
             <div className="space-y-2">
               {activeHazards.map((h) => (
                 <div key={h.id} className="flex items-center justify-between text-sm">
                   <span>{hazardIcon(h.hazard)} {h.title}</span>
                   <span className={`rounded-full px-2 py-0.5 text-xs font-mono uppercase ${severityBadgeClass(h.severity)}`}>
-                    {h.severity}
+                    {dataLabel(td, 'severity', h.severity)}
                   </span>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-sm text-[var(--color-ink)]/50">No active hazards within 50 km.</p>
+            <p className="text-sm text-[var(--color-ink)]/50">{td('district.noHazards')}</p>
           )}
         </section>
 
         {/* Hazard history */}
         <section className={sectionClass}>
-          <h2 className={headingClass}>Hazard History</h2>
+          <h2 className={headingClass}>{td('district.hazardHistory')}</h2>
           {historicalHazards.length > 0 ? (
             <div className="max-h-48 space-y-1 overflow-y-auto">
               {historicalHazards.map((h) => (
                 <div key={h.id} className="font-mono text-xs text-[var(--color-ink)]/60">
-                  {hazardIcon(h.hazard)} {h.title} — {h.starts_at ? formatPkt(h.starts_at) : 'unknown'}
+                  {hazardIcon(h.hazard)} {h.title} — {h.starts_at ? formatPkt(h.starts_at, locale) : '—'}
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-sm text-[var(--color-ink)]/50">No historical hazard records nearby.</p>
+            <p className="text-sm text-[var(--color-ink)]/50">{td('district.noHistory')}</p>
           )}
         </section>
 

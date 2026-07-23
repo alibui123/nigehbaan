@@ -29,7 +29,7 @@ export default function NavMenu({ locale, isOps, role, districtId }: NavMenuProp
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(!open)}
-        aria-label="Open navigation menu"
+        aria-label={t('openNav')}
         aria-expanded={open}
         className="flex h-9 w-9 flex-col items-center justify-center gap-1.5 rounded-md hover:bg-white/10"
       >
@@ -39,7 +39,7 @@ export default function NavMenu({ locale, isOps, role, districtId }: NavMenuProp
       </button>
 
       {open && (
-        <div className="absolute right-0 top-11 z-50 w-56 rounded-md border border-[var(--color-border)] bg-[var(--color-primary)] py-2 shadow-lg">
+        <div className="absolute end-0 top-11 z-50 w-56 rounded-md border border-[var(--color-border)] bg-[var(--color-primary)] py-2 shadow-lg">
           {role === 'district_focal' && districtId && (
             <a
               href={`/${locale}/dashboard/district/${districtId}`}

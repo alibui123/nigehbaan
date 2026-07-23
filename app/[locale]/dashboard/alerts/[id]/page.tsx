@@ -13,9 +13,16 @@ import {
   canTransition,
   escalateSeverity,
   isDistrictFocal,
-  workflowButtonLabel,
   type AppRole,
 } from '@/lib/alert-workflow'
+import { getTranslations } from 'next-intl/server'
+import {
+  dataLabel,
+  districtDisplayName,
+  localizeAlertFields,
+  provinceDisplayName,
+  workflowLabel,
+} from '@/lib/localized'
 
 const CAPSchema = z.object({
   event_en: z.string().min(1, 'English event name is required'),
@@ -176,6 +183,8 @@ export default async function AlertComposerPage({
   params: Promise<{ id: string; locale: string }>
 }) {
   const { id, locale } = await params
+  const td = await getTranslations('Data')
+  const ta = await getTranslations('Alerts')
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect(`/${locale}/login`)
@@ -187,7 +196,7 @@ export default async function AlertComposerPage({
 
   const { data: alert } = await supabase
     .from('alert_candidate')
-    .select('*, district:district_id(name_en, province)')
+    .select('*, district:district_id(name_en, name_ur, province)')
     .eq('id', id)
     .single()
 
@@ -252,18 +261,22 @@ export default async function AlertComposerPage({
   const inputClass = 'w-full rounded-md border border-[var(--color-border)] px-3 py-2 text-sm'
   const labelClass = 'mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-ink)]/60'
   const capExportable = alert.status === 'issued' || alert.status === 'cancelled'
+  const localized = localizeAlertFields(locale, alert)
+  const districtLabel = alert.district
+    ? `${districtDisplayName(locale, alert.district.name_en, alert.district.name_ur)}, ${provinceDisplayName(locale, alert.district.province)}`
+    : ta('global')
 
   return (
     <div className="min-h-screen bg-[var(--color-base)]">
       <header className="print:hidden flex items-center gap-4 border-b border-[var(--color-border)] bg-[var(--color-primary)] px-6 py-4">
         <Link href={`/${locale}/dashboard/alerts`} className="text-sm text-white/70 hover:text-white">
-          ← {focalReadOnly ? 'District Alerts' : 'Alert Review'}
+          ← {focalReadOnly ? ta('districtAlerts') : ta('candidateReview')}
         </Link>
         <h1 className="text-lg font-semibold text-white">
-          {focalReadOnly ? 'Alert Detail' : 'CAP Composer'}
+          {focalReadOnly ? localized.headline : 'CAP Composer'}
         </h1>
-        <span className="ml-4 rounded-full bg-white/10 px-3 py-1 font-mono text-xs uppercase text-white">
-          {alert.status}
+        <span className="ms-4 rounded-full bg-white/10 px-3 py-1 font-mono text-xs uppercase text-white">
+          {dataLabel(td, 'status', alert.status)}
         </span>
         {role && (
           <span className="rounded-full bg-white/5 px-3 py-1 font-mono text-xs uppercase text-white/70">
@@ -277,14 +290,14 @@ export default async function AlertComposerPage({
         <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
           <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-[var(--color-ink)]/60">Source</h2>
           <p className="text-sm text-[var(--color-ink)]">
-            {alert.title} — {alert.district ? `${alert.district.name_en}, ${alert.district.province}` : 'Global'}
+            {localized.headline} — {districtLabel}
           </p>
           <p className="mt-1 text-xs text-[var(--color-ink)]/50">
-            Metric: {alert.metric_name} · Observed: {alert.observed_value} · Threshold: {alert.threshold_value}
+            {ta('metric')}: {alert.metric_name} · {ta('observed')}: {alert.observed_value} · {ta('threshold')}: {alert.threshold_value}
           </p>
-          {alert.event_en && (
+          {(alert.event_en || alert.event_ur) && (
             <p className="mt-2 text-xs text-[var(--color-ink)]/60">
-              CAP pre-filled: {alert.event_en}
+              CAP: {localized.event}
               {alert.urgency ? ` · urgency ${alert.urgency}` : ''}
             </p>
           )}
@@ -404,7 +417,7 @@ export default async function AlertComposerPage({
                         : 'bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)]'
                     }`}
                   >
-                    {workflowButtonLabel(alert.status, primaryAction)}
+                    {workflowLabel(td, alert.status, primaryAction)}
                   </button>
                 </form>
               )}
@@ -421,7 +434,7 @@ export default async function AlertComposerPage({
                         : 'bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)]'
                     }`}
                   >
-                    {workflowButtonLabel(alert.status, next)}
+                    {workflowLabel(td, alert.status, next)}
                   </button>
                 </form>
               ))}

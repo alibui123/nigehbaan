@@ -2,6 +2,24 @@
   "Index": {
     "title": "نگہبان EWS"
   },
+  "Common": {
+    "brand": "نگہبان",
+    "provincialOverview": "صوبائی جائزہ",
+    "backToOverview": "→ صوبائی جائزہ",
+    "switchLanguage": "زبان تبدیل کریں",
+    "english": "EN",
+    "urdu": "اردو"
+  },
+  "Login": {
+    "tagline": "کثیر خطرات کا ابتدائی انتباہی پلیٹ فارم",
+    "email": "ای میل",
+    "password": "پاس ورڈ",
+    "showPassword": "پاس ورڈ دکھائیں",
+    "hidePassword": "پاس ورڈ چھپائیں",
+    "signIn": "سائن ان",
+    "signingIn": "سائن ان ہو رہا ہے…",
+    "footer": "کے پی اور جی بی صوبائی ڈیوٹی کنسول"
+  },
   "Dashboard": {
     "alerts": "الرٹس",
     "stations": "اسٹیشن کی صحت",
@@ -40,6 +58,158 @@
     "layerDrought": "خشک سالی (SPI-3)",
     "layerGlacial": "برفانی جھیلیں",
     "layerStations": "فیلڈ اسٹیشنز",
-    "layerSnow": "NASA برف کی تہہ"
+    "layerSnow": "NASA برف کی تہہ",
+    "openNav": "نیویگیشن مینو کھولیں"
+  },
+  "Alerts": {
+    "candidateReview": "الرٹ امیدواروں کا جائزہ",
+    "districtAlerts": "ضلعی الرٹس",
+    "provincialAlerts": "صوبائی الرٹس",
+    "roleDistrictFocal": "ضلعی فوکل",
+    "roleViewer": "ناظر",
+    "helpFocal": "آپ کے ضلع کے جاری کردہ انتباہات۔ CAP تفصیلات دیکھنے اور فیلڈ ترسیل کی تصدیق کے لیے الرٹ کھولیں۔ آپ الرٹ نہیں بنا سکتے یا منظور نہیں کر سکتے۔",
+    "helpViewer": "تمام جاری کردہ صوبائی الرٹس کا صرف مطالعہ۔ آپ الرٹ نہیں بنا، ترمیم یا منظور نہیں کر سکتے۔",
+    "helpOps": "قواعد سے پیدا ہونے والے امیدوار pending میں آتے ہیں۔ ڈیوٹی آفیسر CAP فیلڈز تحریر کرتا ہے → DG منظوری کے لیے جمع → DG جاری کرتا ہے۔",
+    "noDistrictAssigned": "آپ کے اکاؤنٹ سے کوئی district_id منسلک نہیں — منتظم سے ضلع تفویض کروائیں۔",
+    "noIssuedAlerts": "کوئی جاری کردہ الرٹ نہیں۔",
+    "noIssuedForDistrict": "آپ کے ضلع کے لیے کوئی جاری کردہ الرٹ نہیں۔",
+    "noCandidates": "جائزے کے لیے کوئی زیر التوا الرٹ نہیں۔",
+    "dismiss": "مسترد کریں",
+    "review": "جائزہ",
+    "open": "کھولیں",
+    "openCapComposer": "CAP کمپوزر کھولیں",
+    "viewCap": "CAP دیکھیں",
+    "disseminationAck": "ترسیل اور تصدیق",
+    "severity": "شدت",
+    "status": "حالت",
+    "district": "ضلع",
+    "metric": "میٹرک",
+    "observed": "مشاہدہ",
+    "threshold": "حد",
+    "created": "تخلیق",
+    "issued": "جاری",
+    "generated": "تخلیق شدہ",
+    "global": "عالمی",
+    "requiresDgApproval": "DG منظوری درکار",
+    "draftingInProgress": "مسودہ جاری",
+    "newAwaitingDraft": "نیا — CAP مسودے کا انتظار",
+    "openCandidates": "کھلے امیدوار ({showing})",
+    "openCandidatesOf": "کھلے امیدوار ({showing} از {total})",
+    "showingRecent": "{total} کھلے امیدواروں میں سے تازہ ترین {showing} دکھائے جا رہے ہیں۔"
+  },
+  "Stations": {
+    "title": "اسٹیشن کی صحت",
+    "subtitle": "GLOF-II فیلڈ نیٹ ورک · نقلی + ورچوئل گیجز · 24 گھنٹے آف لائن پر خودکار مرمت ٹکٹ"
+  },
+  "Audit": {
+    "title": "سسٹم آڈٹ لاگ",
+    "entries": "{count} اندراجات"
+  },
+  "Replay": {
+    "title": "ری پلے موڈ",
+    "subtitle": "ڈیمو اور تربیت کے لیے 60–300× رفتار پر وقتی طور پر سکیڑی ہوئی تاریخی منظرنامے۔"
+  },
+  "Data": {
+    "severity": {
+      "advisory": "مشاورتی",
+      "watch": "نگرانی",
+      "warning": "انتباہ",
+      "emergency": "ہنگامی"
+    },
+    "status": {
+      "pending": "زیر التوا",
+      "draft": "مسودہ",
+      "pending_approval": "منظوری زیر التوا",
+      "issued": "جاری کردہ",
+      "approved": "منظور شدہ",
+      "dismissed": "مسترد",
+      "cancelled": "منسوخ",
+      "expired": "میعاد ختم",
+      "online": "آن لائن",
+      "degraded": "کمزور",
+      "offline": "آف لائن",
+      "delivered": "پہنچایا گیا",
+      "acknowledged": "تصدیق شدہ",
+      "failed": "ناکام",
+      "queued": "قطار میں",
+      "sent": "بھیجا گیا",
+      "open": "کھلا",
+      "closed": "بند"
+    },
+    "hazard": {
+      "fire": "آگ",
+      "earthquake": "زلزلہ",
+      "flood": "سیلاب",
+      "glof": "گلیشیائی جھیل پھٹنا",
+      "drought": "خشک سالی",
+      "weather": "موسم",
+      "landslide": "پہاڑی تودہ",
+      "heatwave": "گرمی کی لہر"
+    },
+    "risk": {
+      "high": "زیادہ",
+      "medium": "درمیانی",
+      "low": "کم",
+      "unknown": "نامعلوم",
+      "normal": "عام",
+      "exceptionally high": "غیر معمولی زیادہ",
+      "Low": "کم",
+      "Medium": "درمیانی",
+      "High": "زیادہ"
+    },
+    "province": {
+      "KP": "خیبر پختونخوا",
+      "GB": "گلگت بلتستان"
+    },
+    "workflow": {
+      "issueAlert": "الرٹ جاری کریں",
+      "startDrafting": "CAP مسودہ شروع کریں",
+      "submitForApproval": "DG منظوری کے لیے جمع کریں",
+      "returnToDraft": "مسودے پر واپس",
+      "dismiss": "مسترد کریں",
+      "cancel": "الرٹ منسوخ کریں",
+      "transition": "{from} → {to}"
+    },
+    "map": {
+      "severity": "شدت",
+      "status": "حالت",
+      "flood": "سیلاب",
+      "level": "سطح",
+      "rate": "شرح",
+      "class": "درجہ",
+      "glacialLake": "برفانی جھیل",
+      "station": "اسٹیشن",
+      "openDistrict": "ضلعی کنسول کھولنے کے لیے کلک کریں",
+      "cusecs": "کیوسیکس"
+    },
+    "feeds": {
+      "noHazards": "گزشتہ 72 گھنٹوں میں کوئی فعال خطرہ نہیں۔",
+      "noAdvisories": "کوئی حالیہ مشورہ نہیں ملا۔",
+      "pkt": "پاکستانی وقت"
+    },
+    "district": {
+      "population": "آبادی {count}",
+      "activeAlerts": "فعال الرٹس",
+      "activeHazards": "فعال خطرات",
+      "hazardHistory": "خطرات کی تاریخ",
+      "advisories": "مشورے",
+      "weather": "موسم",
+      "floodForecast": "سیلاب کی پیش گوئی",
+      "drought": "خشک سالی (SPI-3)",
+      "stations": "فیلڈ اسٹیشنز",
+      "contacts": "ضلعی رابطے",
+      "noActiveAlerts": "کوئی فعال جاری کردہ الرٹ نہیں۔",
+      "noHazards": "کوئی حالیہ خطرہ نہیں۔",
+      "noHistory": "کوئی تاریخی خطرہ نہیں۔",
+      "noAdvisories": "کوئی مشورہ نہیں۔",
+      "noStations": "اس ضلع میں کوئی اسٹیشن نہیں۔"
+    },
+    "stationKind": {
+      "aws": "AWS",
+      "gauge": "گیج",
+      "camera": "کیمرہ",
+      "virtual": "ورچوئل",
+      "simulated": "نقلی"
+    }
   }
 }

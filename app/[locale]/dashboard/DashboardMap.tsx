@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation'
 import { useReplay } from '@/lib/replay/ReplayContext'
 import { getMapCenter, getReplayMarkerGeoJson } from '@/lib/replay/adapters'
 import ReplayOverlay from '@/lib/replay/ReplayOverlay'
+import { stationMarkerDataUrl, stationLegendSvg } from '@/lib/station-marker'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
 interface LayerToggle {
@@ -32,11 +33,15 @@ const LAYER_TOGGLES: LayerToggle[] = [
   { id: 'snow',         labelKey: 'layerSnow',         defaultVisible: false },
 ]
 
-const TRIANGLE_ICON =
-  'data:image/svg+xml,' +
-  encodeURIComponent(
-    '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><polygon points="16,2 30,30 2,30" fill="white"/></svg>'
-  )
+const STATION_ICON_ONLINE = stationMarkerDataUrl('online')
+const STATION_ICON_DEGRADED = stationMarkerDataUrl('degraded')
+const STATION_ICON_OFFLINE = stationMarkerDataUrl('offline')
+
+function stationIconUrl(status: string | null | undefined): string {
+  if (status === 'online') return STATION_ICON_ONLINE
+  if (status === 'degraded') return STATION_ICON_DEGRADED
+  return STATION_ICON_OFFLINE
+}
 
 function hazardPointLayer(
   id: string,
@@ -60,6 +65,7 @@ function hazardPointLayer(
 export default function DashboardMap() {
   const locale = useLocale()
   const t = useTranslations('Dashboard')
+  const td = useTranslations('Data')
   const router = useRouter()
   const { isReplaying, scenario, currentFrame } = useReplay()
 
@@ -304,16 +310,21 @@ export default function DashboardMap() {
           id: 'stations-layer',
           data: '/api/stations',
           pickable: true,
-          pointType: 'circle',
-          getPointRadius: 4000,
-          getFillColor: (d: { properties: { status?: string } }) => {
-            const s = d.properties.status
-            if (s === 'online') return [15, 107, 61, 220]
-            if (s === 'degraded') return [224, 160, 48, 220]
-            return [179, 38, 30, 220]
+          pointType: 'icon',
+          getIcon: (d: { properties: { status?: string } }) => ({
+            url: stationIconUrl(d.properties.status),
+            width: 64,
+            height: 64,
+            anchorY: 58,
+            mask: false,
+          }),
+          getIconSize: 28,
+          iconSizeUnits: 'pixels',
+          iconSizeMinPixels: 18,
+          iconSizeMaxPixels: 40,
+          updateTriggers: {
+            getIcon: [],
           },
-          getLineColor: [0, 200, 255, 255],
-          getLineWidth: 400,
         })
       )
     }
@@ -431,20 +442,55 @@ export default function DashboardMap() {
         getTooltip={({ object }) => {
           if (!object) return null
           const { properties } = object as { properties: Record<string, string | number | null> }
+          const districtName =
+            locale === 'ur'
+              ? String(properties.name_ur || properties.display_name_ur || properties.name_en || '')
+              : String(properties.name_en || properties.display_name_en || '')
+          const stationDistrict =
+            locale === 'ur'
+              ? String(properties.district_name_ur || properties.district_name || '')
+              : String(properties.district_name || '')
+
           if (properties.water_level_m != null) {
-            return `${properties.name}\nLevel: ${properties.water_level_m} m\nRate: ${properties.rate} m/hr`
+            return `${properties.name}\n${td('map.level')}: ${properties.water_level_m} m\n${td('map.rate')}: ${properties.rate} m/hr`
           }
           if (properties.discharge_cusecs != null) {
-            return `${properties.name}\n${properties.discharge_cusecs.toLocaleString()} cusecs\nFFD: ${properties.ffd_risk ?? properties.flood_level}`
+            return `${properties.name}\n${Number(properties.discharge_cusecs).toLocaleString(locale === 'ur' ? 'ur-PK' : 'en-GB')} ${td('map.cusecs')}\nFFD: ${properties.ffd_risk ?? properties.flood_level}`
           }
-          if (properties.title) return `${properties.title}\nSeverity: ${properties.severity}`
-          if (properties.hazard_class) return `${properties.name || 'Glacial Lake'}\nClass: ${properties.hazard_class}`
-          if (properties.status) return `${properties.name || 'Station'}\nStatus: ${properties.status}`
-          if (properties.risk_level) return `${properties.name_en}\nFlood: ${properties.risk_level}`
-          
-          // Fallback: if it just has name_en, it's the district pick layer
-          if (properties.name_en) return `${properties.name_en}\n${properties.province}\nClick to open district console`
-          
+          if (properties.title) {
+            const sev = properties.severity
+              ? td.has(`severity.${properties.severity}`)
+                ? td(`severity.${String(properties.severity)}` as 'severity.emergency')
+                : String(properties.severity)
+              : ''
+            return `${properties.title}\n${td('map.severity')}: ${sev}`
+          }
+          if (properties.hazard_class) {
+            return `${properties.name || td('map.glacialLake')}\n${td('map.class')}: ${properties.hazard_class}`
+          }
+          if (properties.status && (properties.station_id || properties.name)) {
+            const st = td.has(`status.${properties.status}`)
+              ? td(`status.${String(properties.status)}` as 'status.online')
+              : String(properties.status)
+            const districtLine = stationDistrict ? `\n${stationDistrict}` : ''
+            return `${properties.name || td('map.station')}${districtLine}\n${td('map.status')}: ${st}`
+          }
+          if (properties.risk_level) {
+            const risk = td.has(`risk.${properties.risk_level}`)
+              ? td(`risk.${String(properties.risk_level)}` as 'risk.high')
+              : String(properties.risk_level)
+            return `${districtName || properties.name_en}\n${td('map.flood')}: ${risk}`
+          }
+
+          if (properties.name_en || properties.name_ur) {
+            const prov = properties.province
+              ? td.has(`province.${properties.province}`)
+                ? td(`province.${String(properties.province)}` as 'province.KP')
+                : String(properties.province)
+              : ''
+            return `${districtName}\n${prov}\n${td('map.openDistrict')}`
+          }
+
           return null
         }}
       >
@@ -512,9 +558,28 @@ export default function DashboardMap() {
             <span className="text-[11px] text-white/80">{t('hazardEvent')}</span>
           </div>
           <div className="flex items-center gap-2">
-            <svg width="12" height="12"><polygon points="6,1 11,11 1,11" fill="#0F6B3D" stroke="white" strokeWidth="1"/></svg>
+            <span
+              className="inline-flex"
+              dangerouslySetInnerHTML={{ __html: stationLegendSvg('online') }}
+            />
             <span className="text-[11px] text-white/80">{t('fieldStation')}</span>
           </div>
+          {visibility.stations && (
+            <div className="ms-4 space-y-1 border-s border-white/10 ps-2">
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-[#0F6B3D]" />
+                <span className="text-[10px] text-white/70">Online</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-[#E0A030]" />
+                <span className="text-[10px] text-white/70">Degraded</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-[#B3261E]" />
+                <span className="text-[10px] text-white/70">Offline</span>
+              </div>
+            </div>
+          )}
           {visibility.glofas && (
             <>
               <div className="my-1 border-t border-white/10" />

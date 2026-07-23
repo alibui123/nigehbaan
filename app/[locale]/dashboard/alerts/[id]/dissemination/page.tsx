@@ -11,6 +11,13 @@ import {
   canRunAckSimulation,
   type AppRole,
 } from '@/lib/alert-workflow'
+import { getTranslations } from 'next-intl/server'
+import {
+  dataLabel,
+  districtDisplayName,
+  localizeAlertFields,
+  provinceDisplayName,
+} from '@/lib/localized'
 
 export default async function DisseminationBoardPage({
   params,
@@ -20,6 +27,8 @@ export default async function DisseminationBoardPage({
   searchParams: Promise<{ error?: string; ok?: string }>
 }) {
   const { id, locale } = await params
+  const td = await getTranslations('Data')
+  const ta = await getTranslations('Alerts')
   const { error: queryError, ok: queryOk } = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -35,7 +44,7 @@ export default async function DisseminationBoardPage({
 
   const { data: alert } = await supabase
     .from('alert_candidate')
-    .select('*, district:district_id(id, name_en, province)')
+    .select('*, district:district_id(id, name_en, name_ur, province)')
     .eq('id', id)
     .single()
 
@@ -105,11 +114,14 @@ export default async function DisseminationBoardPage({
         <div className={sectionClass}>
           <h2 className={headingClass}>Issuing</h2>
           <p className="text-sm text-[var(--color-ink)]">
-            {alert.headline_en || alert.title} —{' '}
-            {alert.district ? `${alert.district.name_en}, ${alert.district.province}` : 'Global'}
+            {localizeAlertFields(locale, alert).headline} —{' '}
+            {alert.district
+              ? `${districtDisplayName(locale, alert.district.name_en, alert.district.name_ur)}, ${provinceDisplayName(locale, alert.district.province)}`
+              : ta('global')}
           </p>
           <p className="mt-1 text-xs text-[var(--color-ink)]/50">
-            Severity: {alert.severity} · Urgency: {alert.urgency ?? '—'} · Certainty: {alert.certainty ?? '—'}
+            {ta('severity')}: {dataLabel(td, 'severity', alert.severity)} · Urgency: {alert.urgency ?? '—'} · Certainty:{' '}
+            {alert.certainty ?? '—'}
           </p>
           {hasDeliveries && dryRunPlanned && (
             <p className="mt-3 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-900">

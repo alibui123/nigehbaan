@@ -9,6 +9,7 @@ import ReplayKpiStrip from '@/lib/replay/ReplayKpiStrip'
 import ReplayChrome from '@/lib/replay/ReplayChrome'
 import { isProvincialOps, type AppRole } from '@/lib/alert-workflow'
 import NavMenu from './NavMenu'
+import LanguageToggle from '../LanguageToggle'
 import { getTranslations } from 'next-intl/server'
 
 export default async function DashboardPage({
@@ -18,6 +19,7 @@ export default async function DashboardPage({
 }) {
   const { locale } = await params
   const t = await getTranslations('Dashboard')
+  const tc = await getTranslations('Common')
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
@@ -72,15 +74,16 @@ export default async function DashboardPage({
             <span className="font-mono text-sm font-semibold text-[var(--color-primary)]">N</span>
           </div>
           <div>
-            <h1 className="text-sm font-semibold text-white">Nigheban</h1>
+            <h1 className="text-sm font-semibold text-white">{tc('brand')}</h1>
             <p className="text-xs text-white/70">{t('provincialOverview')}</p>
           </div>
         </div>
-        <div className="flex items-center gap-4">
-         <NavMenu locale={locale} isOps={isOps} role={role} districtId={profile?.district_id} />
+        <div className="flex items-center gap-3 sm:gap-4">
+          <LanguageToggle currentLocale={locale} variant="header" />
+          <NavMenu locale={locale} isOps={isOps} role={role} districtId={profile?.district_id} />
           <span className="text-sm text-white/90">
             {profile?.full_name ?? user.email}
-            <span className="ml-2 rounded-full bg-white/15 px-2 py-0.5 font-mono text-xs uppercase">
+            <span className="ms-2 rounded-full bg-white/15 px-2 py-0.5 font-mono text-xs uppercase">
               {profile?.role ?? 'viewer'}
             </span>
           </span>

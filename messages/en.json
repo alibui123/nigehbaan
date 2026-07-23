@@ -2,6 +2,24 @@
   "Index": {
     "title": "Nigheban EWS"
   },
+  "Common": {
+    "brand": "Nigheban",
+    "provincialOverview": "Provincial Overview",
+    "backToOverview": "← Provincial Overview",
+    "switchLanguage": "Switch language",
+    "english": "EN",
+    "urdu": "اردو"
+  },
+  "Login": {
+    "tagline": "Multi-Hazard Early Warning Platform",
+    "email": "Email",
+    "password": "Password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "signIn": "Sign in",
+    "signingIn": "Signing in…",
+    "footer": "KP & GB Provincial Duty Console"
+  },
   "Dashboard": {
     "alerts": "Alerts",
     "stations": "Station Health",
@@ -40,6 +58,158 @@
     "layerDrought": "Drought (SPI-3)",
     "layerGlacial": "Glacial Lakes",
     "layerStations": "Field Stations",
-    "layerSnow": "NASA Snow Cover"
+    "layerSnow": "NASA Snow Cover",
+    "openNav": "Open navigation menu"
+  },
+  "Alerts": {
+    "candidateReview": "Alert Candidate Review",
+    "districtAlerts": "District Alerts",
+    "provincialAlerts": "Provincial Alerts",
+    "roleDistrictFocal": "district focal",
+    "roleViewer": "viewer",
+    "helpFocal": "Issued warnings for your district. Open an alert to view CAP details and acknowledge field deliveries. You cannot compose or approve alerts.",
+    "helpViewer": "Read-only view of all issued provincial alerts. You cannot compose, edit, or approve alerts.",
+    "helpOps": "Rule-fired candidates enter as pending. Duty officers draft CAP fields → submit for DG approval → DG issues.",
+    "noDistrictAssigned": "Your account has no district_id assigned — ask an admin to attach you to a district.",
+    "noIssuedAlerts": "No issued alerts.",
+    "noIssuedForDistrict": "No issued alerts for your district.",
+    "noCandidates": "No pending alerts require review.",
+    "dismiss": "Dismiss",
+    "review": "Review",
+    "open": "Open",
+    "openCapComposer": "Open CAP Composer",
+    "viewCap": "View CAP",
+    "disseminationAck": "Dissemination & Acknowledge",
+    "severity": "Severity",
+    "status": "Status",
+    "district": "District",
+    "metric": "Metric",
+    "observed": "Observed",
+    "threshold": "Threshold",
+    "created": "Created",
+    "issued": "Issued",
+    "generated": "Generated",
+    "global": "Global",
+    "requiresDgApproval": "Requires DG Approval",
+    "draftingInProgress": "Drafting in Progress",
+    "newAwaitingDraft": "New — awaiting CAP draft",
+    "openCandidates": "Open Candidates ({showing})",
+    "openCandidatesOf": "Open Candidates ({showing} of {total})",
+    "showingRecent": "Showing the {showing} most recent of {total} open candidates."
+  },
+  "Stations": {
+    "title": "Station Health",
+    "subtitle": "GLOF-II field network · simulated + virtual gauges · maintenance auto-tickets at 24h offline"
+  },
+  "Audit": {
+    "title": "System Audit Log",
+    "entries": "{count} entries"
+  },
+  "Replay": {
+    "title": "Replay Mode",
+    "subtitle": "Time-compressed historical scenarios at 60–300× speed for demos and training."
+  },
+  "Data": {
+    "severity": {
+      "advisory": "Advisory",
+      "watch": "Watch",
+      "warning": "Warning",
+      "emergency": "Emergency"
+    },
+    "status": {
+      "pending": "Pending",
+      "draft": "Draft",
+      "pending_approval": "Pending approval",
+      "issued": "Issued",
+      "approved": "Approved",
+      "dismissed": "Dismissed",
+      "cancelled": "Cancelled",
+      "expired": "Expired",
+      "online": "Online",
+      "degraded": "Degraded",
+      "offline": "Offline",
+      "delivered": "Delivered",
+      "acknowledged": "Acknowledged",
+      "failed": "Failed",
+      "queued": "Queued",
+      "sent": "Sent",
+      "open": "Open",
+      "closed": "Closed"
+    },
+    "hazard": {
+      "fire": "Fire",
+      "earthquake": "Earthquake",
+      "flood": "Flood",
+      "glof": "GLOF",
+      "drought": "Drought",
+      "weather": "Weather",
+      "landslide": "Landslide",
+      "heatwave": "Heatwave"
+    },
+    "risk": {
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low",
+      "unknown": "Unknown",
+      "normal": "Normal",
+      "exceptionally high": "Exceptionally high",
+      "Low": "Low",
+      "Medium": "Medium",
+      "High": "High"
+    },
+    "province": {
+      "KP": "Khyber Pakhtunkhwa",
+      "GB": "Gilgit-Baltistan"
+    },
+    "workflow": {
+      "issueAlert": "Issue alert",
+      "startDrafting": "Start drafting CAP",
+      "submitForApproval": "Submit for DG approval",
+      "returnToDraft": "Return to draft",
+      "dismiss": "Dismiss",
+      "cancel": "Cancel alert",
+      "transition": "{from} → {to}"
+    },
+    "map": {
+      "severity": "Severity",
+      "status": "Status",
+      "flood": "Flood",
+      "level": "Level",
+      "rate": "Rate",
+      "class": "Class",
+      "glacialLake": "Glacial Lake",
+      "station": "Station",
+      "openDistrict": "Click to open district console",
+      "cusecs": "cusecs"
+    },
+    "feeds": {
+      "noHazards": "No active hazard events in the last 72 hours.",
+      "noAdvisories": "No recent advisories found.",
+      "pkt": "PKT"
+    },
+    "district": {
+      "population": "Pop. {count}",
+      "activeAlerts": "Active Alerts",
+      "activeHazards": "Active Hazards",
+      "hazardHistory": "Hazard History",
+      "advisories": "Advisories",
+      "weather": "Weather",
+      "floodForecast": "Flood Forecast",
+      "drought": "Drought (SPI-3)",
+      "stations": "Field Stations",
+      "contacts": "District Contacts",
+      "noActiveAlerts": "No active issued alerts.",
+      "noHazards": "No recent hazards.",
+      "noHistory": "No historical hazards.",
+      "noAdvisories": "No advisories.",
+      "noStations": "No stations in this district."
+    },
+    "stationKind": {
+      "aws": "AWS",
+      "gauge": "Gauge",
+      "camera": "Camera",
+      "virtual": "Virtual",
+      "simulated": "Simulated"
+    }
   }
 }

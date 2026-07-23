@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { useReplay } from '@/lib/replay/ReplayContext'
 import { formatReplayDuration } from '@/lib/replay/adapters'
@@ -10,6 +10,8 @@ import { isFloodFrame, isGlofFrame } from '@/lib/replay/types'
 
 export default function ReplayPage() {
   const locale = useLocale()
+  const t = useTranslations('Replay')
+  const tc = useTranslations('Common')
   const router = useRouter()
   const {
     isReplaying,
@@ -39,11 +41,11 @@ export default function ReplayPage() {
       <div className="min-h-screen bg-[var(--color-base)]">
         <header className="border-b border-[var(--color-border)] bg-[var(--color-primary)] px-6 py-4">
           <Link href={`/${locale}/dashboard`} className="text-sm text-white/70 hover:text-white">
-            ← Provincial Overview
+            {tc('backToOverview')}
           </Link>
-          <h1 className="mt-2 text-lg font-semibold text-white">Replay Mode</h1>
+          <h1 className="mt-2 text-lg font-semibold text-white">{t('title')}</h1>
           <p className="text-sm text-white/70">
-            Time-compressed historical scenarios at 60–300× speed for demos and training.
+            {t('subtitle')}
           </p>
         </header>
 

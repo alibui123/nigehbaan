@@ -1,12 +1,14 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { useLocale, useTranslations } from 'next-intl'
 import {
   batteryPercent,
   formatPkt,
   statusBadgeClass,
   type StationHealthRow,
 } from '@/lib/station-health'
+import { dataLabel, districtDisplayName } from '@/lib/localized'
 import StationSparkline from './StationSparkline'
 
 interface MaintenanceTicket {
@@ -26,6 +28,8 @@ interface StationHealthClientProps {
 type StatusFilter = 'all' | 'online' | 'degraded' | 'offline'
 
 export default function StationHealthClient({ stations, tickets }: StationHealthClientProps) {
+  const locale = useLocale()
+  const td = useTranslations('Data')
   const [sparklines, setSparklines] = useState<Record<string, number[]>>({})
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [view, setView] = useState<'grid' | 'table'>('grid')
@@ -60,7 +64,7 @@ export default function StationHealthClient({ stations, tickets }: StationHealth
                   : 'border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-ink)]/60 hover:border-[var(--color-primary-hover)]'
               }`}
             >
-              {f}
+              {f === 'all' ? (locale === 'ur' ? 'سب' : 'all') : dataLabel(td, 'status', f)}
             </button>
           ))}
         </div>
@@ -70,14 +74,14 @@ export default function StationHealthClient({ stations, tickets }: StationHealth
             onClick={() => setView('grid')}
             className={`rounded px-3 py-1 text-xs ${view === 'grid' ? 'bg-[var(--color-primary)] text-white' : 'border border-[var(--color-border)]'}`}
           >
-            Grid
+            {locale === 'ur' ? 'گرڈ' : 'Grid'}
           </button>
           <button
             type="button"
             onClick={() => setView('table')}
             className={`rounded px-3 py-1 text-xs ${view === 'table' ? 'bg-[var(--color-primary)] text-white' : 'border border-[var(--color-border)]'}`}
           >
-            Table
+            {locale === 'ur' ? 'جدول' : 'Table'}
           </button>
         </div>
       </div>
@@ -119,13 +123,13 @@ export default function StationHealthClient({ stations, tickets }: StationHealth
                 <div className="min-w-0">
                   <h3 className="truncate text-sm font-semibold">{s.name}</h3>
                   <p className="truncate text-xs text-[var(--color-ink)]/50">
-                    {s.valley ?? '—'} · {s.district_name ?? '—'}
+                    {s.valley ?? '—'} · {districtDisplayName(locale, s.district_name, s.district_name_ur)}
                   </p>
                 </div>
                 <span
                   className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-mono uppercase ${statusBadgeClass(s.status)}`}
                 >
-                  {s.status}
+                  {dataLabel(td, 'status', s.status)}
                 </span>
               </div>
 
@@ -154,7 +158,7 @@ export default function StationHealthClient({ stations, tickets }: StationHealth
 
               <div className="flex items-center justify-between border-t border-[var(--color-border)] pt-2 text-xs text-[var(--color-ink)]/50">
                 <span className="font-mono uppercase">{s.kind.replace('_', ' ')}</span>
-                <span className="font-mono">{formatPkt(s.last_transmission_at)} PKT</span>
+                <span className="font-mono">{formatPkt(s.last_transmission_at, locale)} {td('feeds.pkt')}</span>
               </div>
             </article>
           ))}
@@ -178,12 +182,14 @@ export default function StationHealthClient({ stations, tickets }: StationHealth
                 <tr key={s.station_id} className="border-t border-[var(--color-border)]">
                   <td className="px-4 py-2">{s.name}</td>
                   <td className="px-4 py-2 text-[var(--color-ink)]/60">{s.valley ?? '—'}</td>
-                  <td className="px-4 py-2 text-[var(--color-ink)]/60">{s.district_name ?? '—'}</td>
+                  <td className="px-4 py-2 text-[var(--color-ink)]/60">
+                    {districtDisplayName(locale, s.district_name, s.district_name_ur)}
+                  </td>
                   <td className="px-4 py-2">
                     <span
                       className={`rounded-full px-2 py-0.5 text-xs font-mono uppercase ${statusBadgeClass(s.status)}`}
                     >
-                      {s.status}
+                      {dataLabel(td, 'status', s.status)}
                     </span>
                   </td>
                   <td className="px-4 py-2">

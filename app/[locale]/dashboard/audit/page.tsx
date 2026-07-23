@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 import { buildAuditQuery, ACTION_LABELS } from '@/lib/audit'
 import AuditLogTable from './AuditLogTable'
 
@@ -23,6 +24,8 @@ export default async function AuditLogPage({
   }>
 }) {
   const { locale } = await params
+  const t = await getTranslations('Audit')
+  const tc = await getTranslations('Common')
   const sp = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -59,12 +62,12 @@ export default async function AuditLogPage({
     <div className="flex h-screen flex-col bg-[var(--color-base)]">
       <header className="flex items-center gap-4 border-b border-[var(--color-border)] bg-[var(--color-primary)] px-6 py-4">
         <Link href={`/${locale}/dashboard`} className="text-sm text-white/70 hover:text-white">
-          ← Provincial Overview
+          {tc('backToOverview')}
         </Link>
-        <h1 className="text-lg font-semibold text-white">System Audit Log</h1>
+        <h1 className="text-lg font-semibold text-white">{t('title')}</h1>
         {count != null && (
-          <span className="ml-auto rounded-full bg-white/10 px-3 py-1 font-mono text-xs text-white">
-            {count.toLocaleString()} entries
+          <span className="ms-auto rounded-full bg-white/10 px-3 py-1 font-mono text-xs text-white">
+            {t('entries', { count: count.toLocaleString() })}
           </span>
         )}
       </header>

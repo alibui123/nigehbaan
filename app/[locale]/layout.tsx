@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, IBM_Plex_Mono } from "next/font/google";
+import { Inter, IBM_Plex_Mono, Noto_Nastaliq_Urdu } from "next/font/google";
 import "../globals.css";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
@@ -16,6 +16,12 @@ const plexMono = IBM_Plex_Mono({
   subsets: ["latin"],
 });
 
+const notoNastaliq = Noto_Nastaliq_Urdu({
+  variable: "--font-urdu",
+  weight: ["400", "500", "600", "700"],
+  subsets: ["arabic"],
+});
+
 export const metadata: Metadata = {
   title: "Nigheban — Multi-Hazard Early Warning Platform",
   description: "Provincial multi-hazard monitoring and alert system for KP & GB",
@@ -30,10 +36,15 @@ export default async function RootLayout({
 }>) {
   const { locale } = await params;
   const messages = await getMessages();
+  const isUrdu = locale === 'ur';
 
   return (
-    <html lang={locale} dir={locale === 'ur' ? 'rtl' : 'ltr'}>
-      <body className={`${inter.variable} ${plexMono.variable} antialiased`}>
+    <html lang={locale} dir={isUrdu ? 'rtl' : 'ltr'}>
+      <body
+        className={`${inter.variable} ${plexMono.variable} ${notoNastaliq.variable} antialiased ${
+          isUrdu ? 'font-[family-name:var(--font-urdu)]' : ''
+        }`}
+      >
         <NextIntlClientProvider messages={messages}>
           {children}
           <LanguageToggle currentLocale={locale} />

@@ -3,9 +3,16 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { revalidatePath } from 'next/cache'
 import { isProvincialOps, type AppRole } from '@/lib/alert-workflow'
+import { getTranslations } from 'next-intl/server'
+import {
+  dataLabel,
+  districtDisplayName,
+  localizeAlertFields,
+  provinceDisplayName,
+} from '@/lib/localized'
 
 const LIST_COLUMNS =
-  'id, district_id, title, description, severity, metric_name, observed_value, threshold_value, status, created_at, issued_at'
+  'id, district_id, title, description, severity, metric_name, observed_value, threshold_value, status, created_at, issued_at, event_en, event_ur, headline_en, headline_ur'
 
 async function dismissCandidate(formData: FormData) {
   'use server'
@@ -31,6 +38,9 @@ export default async function AlertsReviewPage({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params
+  const t = await getTranslations('Alerts')
+  const tc = await getTranslations('Common')
+  const td = await getTranslations('Data')
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect(`/${locale}/login`)
@@ -47,7 +57,7 @@ export default async function AlertsReviewPage({
   if (isRestricted) {
     let query = supabase
       .from('alert_candidate')
-      .select(`${LIST_COLUMNS}, district:district_id(name_en, province)`)
+      .select(`${LIST_COLUMNS}, district:district_id(name_en, name_ur, province)`)
       .eq('status', 'issued')
       .order('issued_at', { ascending: false })
       .limit(50)
@@ -58,20 +68,18 @@ export default async function AlertsReviewPage({
     const { data: issued, error } = await query
     if (error) console.error('[alerts] restricted list failed:', error.message)
 
-    const roleLabel = isFocal ? 'district focal' : 'viewer'
-    const pageTitle = isFocal ? 'District Alerts' : 'Provincial Alerts'
-    const helpText = isFocal
-      ? 'Issued warnings for your district. Open an alert to view CAP details and acknowledge field deliveries. You cannot compose or approve alerts.'
-      : 'Read-only view of all issued provincial alerts. You cannot compose, edit, or approve alerts.'
+    const roleLabel = isFocal ? t('roleDistrictFocal') : t('roleViewer')
+    const pageTitle = isFocal ? t('districtAlerts') : t('provincialAlerts')
+    const helpText = isFocal ? t('helpFocal') : t('helpViewer')
 
     return (
       <div className="flex h-screen flex-col bg-[var(--color-base)]">
         <header className="flex items-center gap-4 border-b border-[var(--color-border)] bg-[var(--color-primary)] px-6 py-4">
           <Link href={`/${locale}/dashboard`} className="text-sm text-white/70 hover:text-white">
-            ← Provincial Overview
+            {tc('backToOverview')}
           </Link>
           <h1 className="text-lg font-semibold text-white">{pageTitle}</h1>
-          <span className="ml-auto rounded-full bg-white/10 px-3 py-1 font-mono text-xs uppercase text-white">
+          <span className="ms-auto rounded-full bg-white/10 px-3 py-1 font-mono text-xs uppercase text-white">
             {roleLabel}
           </span>
         </header>
@@ -83,48 +91,51 @@ export default async function AlertsReviewPage({
             </p>
             {isFocal && !profile?.district_id && (
               <p className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                Your account has no <code>district_id</code> assigned — ask an admin to attach you to a district.
+                {t('noDistrictAssigned')}
               </p>
             )}
             {(issued ?? []).length === 0 ? (
               <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-8 text-center text-[var(--color-ink)]/50">
-                No issued alerts{isFocal ? ' for your district' : ''}.
+                {isFocal ? t('noIssuedForDistrict') : t('noIssuedAlerts')}
               </div>
             ) : (
               <div className="space-y-4">
-                {(issued ?? []).map((c) => (
+                {(issued ?? []).map((c) => {
+                  const text = localizeAlertFields(locale, c)
+                  return (
                   <div key={c.id} className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
                     <div className="mb-2 flex items-center justify-between">
                       <span className="rounded bg-[var(--color-emergency)]/10 px-2 py-0.5 font-mono text-xs font-bold uppercase text-[var(--color-emergency)]">
-                        {c.severity}
+                        {dataLabel(td, 'severity', c.severity)}
                       </span>
                       <span className="font-mono text-xs text-[var(--color-ink)]/40">
-                        Issued {c.issued_at ? new Date(c.issued_at).toLocaleString('en-GB') : '—'}
+                        {t('issued')} {c.issued_at ? new Date(c.issued_at).toLocaleString(locale === 'ur' ? 'ur-PK' : 'en-GB') : '—'}
                       </span>
                     </div>
                     <Link
                       href={`/${locale}/dashboard/alerts/${c.id}`}
                       className="text-lg font-semibold text-[var(--color-ink)] hover:underline"
                     >
-                      {c.title}
+                      {text.headline}
                     </Link>
-                    <p className="mt-1 text-sm text-[var(--color-ink)]/70">{c.description}</p>
+                    <p className="mt-1 text-sm text-[var(--color-ink)]/70">{text.event}</p>
                     <div className="mt-4 flex gap-3">
                       <Link
                         href={`/${locale}/dashboard/alerts/${c.id}/dissemination`}
                         className="rounded-md bg-[var(--color-primary)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--color-primary-hover)]"
                       >
-                        Dissemination &amp; Acknowledge
+                        {t('disseminationAck')}
                       </Link>
                       <Link
                         href={`/${locale}/dashboard/alerts/${c.id}`}
                         className="rounded-md border border-[var(--color-border)] px-4 py-2 text-sm font-semibold hover:bg-[var(--color-border)]"
                       >
-                        View CAP
+                        {t('viewCap')}
                       </Link>
                     </div>
                   </div>
-                ))}
+                  )
+                })}
               </div>
             )}
           </div>
@@ -136,7 +147,7 @@ export default async function AlertsReviewPage({
   const [{ data: candidates, error }, { count: openTotal }] = await Promise.all([
     supabase
       .from('alert_candidate')
-      .select(`${LIST_COLUMNS}, district:district_id(name_en, province)`)
+      .select(`${LIST_COLUMNS}, district:district_id(name_en, name_ur, province)`)
       .in('status', ['pending', 'draft', 'pending_approval'])
       .order('created_at', { ascending: false })
       .limit(50),
@@ -162,80 +173,85 @@ export default async function AlertsReviewPage({
     <div className="flex h-screen flex-col bg-[var(--color-base)]">
       <header className="flex items-center gap-4 border-b border-[var(--color-border)] bg-[var(--color-primary)] px-6 py-4">
         <Link href={`/${locale}/dashboard`} className="text-sm text-white/70 hover:text-white">
-          ← Provincial Overview
+          {tc('backToOverview')}
         </Link>
-        <h1 className="text-lg font-semibold text-white">Alert Candidate Review</h1>
+        <h1 className="text-lg font-semibold text-white">{t('candidateReview')}</h1>
       </header>
 
       <div className="flex-1 overflow-auto p-6">
         <div className="mx-auto max-w-4xl">
           <p className="mb-4 text-sm text-[var(--color-ink)]/60">
-            Rule-fired candidates enter as <strong>pending</strong>. Duty officers draft CAP fields → submit for DG approval → DG issues.
+            {t('helpOps')}
           </p>
           {totalOpen > showing && (
             <p className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-              Showing the <strong>{showing} most recent</strong> of <strong>{totalOpen.toLocaleString()}</strong> open candidates.
+              {t('showingRecent', { showing, total: totalOpen.toLocaleString() })}
             </p>
           )}
           <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[var(--color-ink)]/60">
-            Open Candidates ({showing}
-            {totalOpen > showing ? ` of ${totalOpen.toLocaleString()}` : ''})
+            {totalOpen > showing
+              ? t('openCandidatesOf', { showing, total: totalOpen.toLocaleString() })
+              : t('openCandidates', { showing })}
           </h2>
 
           {sortedCandidates.length === 0 ? (
             <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-8 text-center text-[var(--color-ink)]/50">
-              No pending alerts require review.
+              {t('noCandidates')}
             </div>
           ) : (
             <div className="space-y-4">
-              {sortedCandidates.map((c) => (
+              {sortedCandidates.map((c) => {
+                const text = localizeAlertFields(locale, c)
+                return (
                 <div key={c.id} className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
                   <div className="mb-2 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="rounded bg-[var(--color-emergency)]/10 px-2 py-0.5 font-mono text-xs font-bold uppercase text-[var(--color-emergency)]">
-                        {c.severity}
+                        {dataLabel(td, 'severity', c.severity)}
                       </span>
                       {c.status === 'pending_approval' && (
                         <span className="rounded border border-yellow-300 bg-yellow-100 px-2 py-0.5 font-mono text-xs font-bold uppercase text-yellow-800">
-                          Requires DG Approval
+                          {t('requiresDgApproval')}
                         </span>
                       )}
                       {c.status === 'draft' && (
                         <span className="rounded border border-gray-300 bg-gray-100 px-2 py-0.5 font-mono text-xs font-bold uppercase text-gray-600">
-                          Drafting in Progress
+                          {t('draftingInProgress')}
                         </span>
                       )}
                       {c.status === 'pending' && (
                         <span className="rounded border border-blue-200 bg-blue-50 px-2 py-0.5 font-mono text-xs font-bold uppercase text-blue-600">
-                          New — awaiting CAP draft
+                          {t('newAwaitingDraft')}
                         </span>
                       )}
                     </div>
                     <span className="font-mono text-xs text-[var(--color-ink)]/40">
-                      Generated {new Date(c.created_at).toLocaleString('en-GB')}
+                      {t('generated')} {new Date(c.created_at).toLocaleString(locale === 'ur' ? 'ur-PK' : 'en-GB')}
                     </span>
                   </div>
                   <Link
                     href={`/${locale}/dashboard/alerts/${c.id}`}
                     className="text-lg font-semibold text-[var(--color-ink)] hover:underline"
                   >
-                    {c.title}
+                    {text.headline}
                   </Link>
-                  <p className="mt-1 text-sm text-[var(--color-ink)]/70">{c.description}</p>
+                  <p className="mt-1 text-sm text-[var(--color-ink)]/70">{c.description || text.event}</p>
 
                   <div className="mt-4 grid grid-cols-2 gap-4 rounded bg-[var(--color-base)] p-3 font-mono text-xs">
                     <div>
-                      <span className="text-[var(--color-ink)]/50">Metric:</span> {c.metric_name}
+                      <span className="text-[var(--color-ink)]/50">{t('metric')}:</span> {c.metric_name}
                     </div>
                     <div>
-                      <span className="text-[var(--color-ink)]/50">District:</span>{' '}
-                      {c.district ? `${c.district.name_en}, ${c.district.province}` : 'Global'}
+                      <span className="text-[var(--color-ink)]/50">{t('district')}:</span>{' '}
+                      {c.district
+                        ? `${districtDisplayName(locale, c.district.name_en, c.district.name_ur)}, ${provinceDisplayName(locale, c.district.province)}`
+                        : t('global')}
                     </div>
                     <div>
-                      <span className="text-[var(--color-ink)]/50">Observed:</span> {c.observed_value}
+                      <span className="text-[var(--color-ink)]/50">{t('observed')}:</span> {c.observed_value}
                     </div>
                     <div>
-                      <span className="text-[var(--color-ink)]/50">Threshold:</span> {c.threshold_value}
+                      <span className="text-[var(--color-ink)]/50">{t('threshold')}:</span> {c.threshold_value}
                     </div>
                   </div>
 
@@ -244,7 +260,7 @@ export default async function AlertsReviewPage({
                       href={`/${locale}/dashboard/alerts/${c.id}`}
                       className="rounded-md bg-[var(--color-primary)] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[var(--color-primary-hover)]"
                     >
-                      Open CAP Composer
+                      {t('openCapComposer')}
                     </Link>
                     {c.status === 'pending' && (
                       <form action={dismissCandidate}>
@@ -254,13 +270,14 @@ export default async function AlertsReviewPage({
                           type="submit"
                           className="rounded-md border border-[var(--color-border)] bg-transparent px-4 py-2 text-sm font-semibold text-[var(--color-ink)] hover:bg-[var(--color-border)]"
                         >
-                          Dismiss
+                          {t('dismiss')}
                         </button>
                       </form>
                     )}
                   </div>
                 </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>

@@ -1,9 +1,11 @@
 'use client'
 
 import { useFormStatus } from 'react-dom'
+import { useTranslations } from 'next-intl'
 
 export default function SubmitButton() {
   const { pending } = useFormStatus()
+  const t = useTranslations('Login')
 
   return (
     <button
@@ -33,7 +35,7 @@ export default function SubmitButton() {
           />
         </svg>
       )}
-      {pending ? 'Signing in…' : 'Sign in'}
+      {pending ? t('signingIn') : t('signIn')}
     </button>
   )
 }

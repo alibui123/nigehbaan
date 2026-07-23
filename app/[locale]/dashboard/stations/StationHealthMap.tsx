@@ -3,6 +3,22 @@
 import { useEffect, useRef } from 'react'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
+import { stationMarkerSvg } from '@/lib/station-marker'
+
+async function loadStationIcon(map: maplibregl.Map, id: string, status: string) {
+  if (map.hasImage(id)) return
+  const svg = stationMarkerSvg(status)
+  const img = new Image(64, 64)
+  img.decoding = 'async'
+  await new Promise<void>((resolve, reject) => {
+    img.onload = () => resolve()
+    img.onerror = () => reject(new Error(`Failed to load station icon ${id}`))
+    img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
+  })
+  if (!map.hasImage(id)) {
+    map.addImage(id, img, { pixelRatio: 2 })
+  }
+}
 
 export default function StationHealthMap() {
   const mapContainer = useRef<HTMLDivElement>(null)
@@ -35,6 +51,12 @@ export default function StationHealthMap() {
     mapRef.current = map
 
     map.on('load', async () => {
+      await Promise.all([
+        loadStationIcon(map, 'station-online', 'online'),
+        loadStationIcon(map, 'station-degraded', 'degraded'),
+        loadStationIcon(map, 'station-offline', 'offline'),
+      ])
+
       const res = await fetch('/api/stations')
       const geojson = await res.json()
 
@@ -42,20 +64,19 @@ export default function StationHealthMap() {
 
       map.addLayer({
         id: 'station-points',
-        type: 'circle',
+        type: 'symbol',
         source: 'stations',
-        paint: {
-          'circle-radius': 6,
-          'circle-color': [
+        layout: {
+          'icon-image': [
             'match',
             ['get', 'status'],
-            'online', '#0F6B3D',
-            'degraded', '#E0A030',
-            'offline', '#B3261E',
-            '#888888',
+            'online', 'station-online',
+            'degraded', 'station-degraded',
+            'station-offline',
           ],
-          'circle-stroke-width': 1.5,
-          'circle-stroke-color': '#FFFFFF',
+          'icon-size': 0.55,
+          'icon-allow-overlap': true,
+          'icon-anchor': 'bottom',
         },
       })
 

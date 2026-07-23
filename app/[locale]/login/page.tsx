@@ -1,15 +1,26 @@
+import { getTranslations } from 'next-intl/server'
 import { signIn } from './actions'
 import LoginForm from './LoginForm'
+import LanguageToggle from '../LanguageToggle'
 
 export default async function LoginPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ locale: string }>
   searchParams: Promise<{ error?: string }>
 }) {
+  const { locale } = await params
   const { error } = await searchParams
+  const t = await getTranslations('Login')
+  const tc = await getTranslations('Common')
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--color-base)] px-4">
+      <div className="absolute end-4 top-4 z-20">
+        <LanguageToggle currentLocale={locale} variant="header" />
+      </div>
+
       {/* Subtle topographic contour background */}
       <svg
         className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.06]"
@@ -33,17 +44,17 @@ export default async function LoginPage({
             <span className="font-mono text-lg font-semibold text-white">N</span>
           </div>
           <h1 className="text-xl font-semibold text-[var(--color-ink)]">
-            Nigheban
+            {tc('brand')}
           </h1>
           <p className="mt-1 text-sm text-[var(--color-ink)]/60">
-            Multi-Hazard Early Warning Platform
+            {t('tagline')}
           </p>
         </div>
 
         <LoginForm error={error} action={signIn} />
 
         <p className="mt-6 text-center font-mono text-xs text-[var(--color-ink)]/40">
-          KP &amp; GB Provincial Duty Console
+          {t('footer')}
         </p>
       </div>
     </main>

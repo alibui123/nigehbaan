@@ -23,9 +23,9 @@ export function riskLevelClass(level: string): string {
   return 'text-[var(--color-ink)]/50'
 }
 
-export function formatPkt(iso: string | null | undefined): string {
+export function formatPkt(iso: string | null | undefined, locale: string = 'en'): string {
   if (!iso) return '—'
-  return new Date(iso).toLocaleString('en-GB', {
+  return new Date(iso).toLocaleString(locale === 'ur' ? 'ur-PK' : 'en-GB', {
     timeZone: 'Asia/Karachi',
     day: '2-digit',
     month: 'short',
