@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { actionLabel, formatAuditTimestamp, type AuditLogRow } from '@/lib/audit'
+import { formatAuditTimestamp, type AuditLogRow } from '@/lib/audit'
 
 export interface DeliveryStats {
   total: number
@@ -21,6 +21,14 @@ export interface PostEventReportData {
   deliveryStats: DeliveryStats | null
   channels: { channel: string; recipient_count: number }[]
   generatedAt: string
+  /** Short reference for filenames / cover (first 8 of UUID). */
+  shortRef: string
+  lifecycle: {
+    detectedAt: string | null
+    issuedAt: string | null
+    firstDispatchAt: string | null
+    firstAckAt: string | null
+  }
 }
 
 export async function loadPostEventReport(
@@ -70,9 +78,13 @@ export async function loadPostEventReport(
     deliveryStats = {
       ...stats,
       ackRate,
-      estimatedReach: (channels ?? []).reduce((s, c) => s + c.recipient_count, 0),
+      estimatedReach: (channels ?? []).reduce((s, c) => s + Number(c.recipient_count || 0), 0),
     }
   }
+
+  const logs = (auditLogs ?? []) as AuditLogRow[]
+  const firstOf = (actions: string[]) =>
+    logs.find((l) => actions.includes(l.action))?.at ?? null
 
   const district = alert.district as { name_en?: string; province?: string } | null
 
@@ -81,14 +93,46 @@ export async function loadPostEventReport(
     districtName: district?.name_en ?? null,
     province: district?.province ?? null,
     issuerName,
-    auditLogs: (auditLogs ?? []) as AuditLogRow[],
+    auditLogs: logs,
     deliveryStats,
     channels: channels ?? [],
     generatedAt: formatAuditTimestamp(new Date().toISOString()),
+    shortRef: alertId.replace(/-/g, '').slice(0, 8).toUpperCase(),
+    lifecycle: {
+      detectedAt: (alert.created_at as string) ?? firstOf(['rule_fired', 'candidate_created']),
+      issuedAt: (alert.issued_at as string) ?? null,
+      firstDispatchAt: firstOf([
+        'dissemination_fanout_on_issue',
+        'dissemination_dry_run_started',
+        'dissemination_live_sms',
+        'dissemination_live_whatsapp',
+      ]),
+      firstAckAt: firstOf(['acknowledgement_received']),
+    },
   }
 }
 
 export function reportHeadline(data: PostEventReportData): string {
   const a = data.alert
   return (a.headline_en as string) || (a.event_en as string) || (a.title as string) || 'Alert'
+}
+
+export function reportFilename(data: PostEventReportData): string {
+  const district = (data.districtName ?? 'Provincial').replace(/[^a-zA-Z0-9]+/g, '_')
+  const day = new Date().toISOString().slice(0, 10)
+  return `Nigheban_PostEvent_${district}_${data.shortRef}_${day}.pdf`
+}
+
+export function severityTone(severity: string | null | undefined): { bg: string; fg: string; border: string } {
+  const s = (severity ?? '').toLowerCase()
+  if (s === 'extreme' || s === 'severe') {
+    return { bg: '#fef2f2', fg: '#991b1b', border: '#dc2626' }
+  }
+  if (s === 'moderate') {
+    return { bg: '#fff7ed', fg: '#9a3412', border: '#ea580c' }
+  }
+  if (s === 'minor') {
+    return { bg: '#fffbeb', fg: '#92400e', border: '#d97706' }
+  }
+  return { bg: '#f8fafc', fg: '#334155', border: '#64748b' }
 }

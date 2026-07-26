@@ -1,17 +1,21 @@
 'use client'
 
 import { useFormStatus } from 'react-dom'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 export default function SubmitButton() {
   const { pending } = useFormStatus()
   const t = useTranslations('Login')
+  const locale = useLocale()
+  const isUrdu = locale === 'ur'
 
   return (
     <button
       type="submit"
       disabled={pending}
-      className="flex w-full items-center justify-center gap-2 rounded-md bg-[var(--color-primary)] py-2.5 text-sm font-medium text-white transition-colors hover:bg-[var(--color-primary-hover)] disabled:cursor-not-allowed disabled:opacity-70"
+      className={`flex w-full items-center justify-center gap-2 rounded-md bg-[var(--color-primary)] py-2.5 text-sm font-medium text-white transition-colors hover:bg-[var(--color-primary-hover)] disabled:cursor-not-allowed disabled:opacity-70 ${
+        isUrdu ? 'font-[family-name:var(--font-urdu)]' : ''
+      }`}
     >
       {pending && (
         <svg

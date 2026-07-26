@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import SubmitButton from './SubmitButton'
 
 interface LoginFormProps {
@@ -12,6 +12,8 @@ interface LoginFormProps {
 export default function LoginForm({ error, action }: LoginFormProps) {
   const [showPassword, setShowPassword] = useState(false)
   const t = useTranslations('Login')
+  const locale = useLocale()
+  const isUrdu = locale === 'ur'
 
   return (
     <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
@@ -19,37 +21,45 @@ export default function LoginForm({ error, action }: LoginFormProps) {
         <div>
           <label
             htmlFor="email"
-            className="mb-1.5 block text-sm font-medium text-[var(--color-ink)]"
+            className={`mb-1.5 block text-sm font-medium text-[var(--color-ink)] ${
+              isUrdu ? 'text-end font-[family-name:var(--font-urdu)]' : 'text-start'
+            }`}
           >
             {t('email')}
           </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            required
-            className="w-full rounded-md border border-[var(--color-border)] px-3 py-2 text-sm outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
-            placeholder="you@nigheban.gov.pk"
-            dir="ltr"
-          />
+          {/* LTR isolate: email stays left-to-right without breaking RTL label layout */}
+          <div dir="ltr" className="w-full">
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              autoComplete="username"
+              className="w-full rounded-md border border-[var(--color-border)] px-3 py-2 text-left text-sm outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
+              placeholder="you@nigheban.gov.pk"
+            />
+          </div>
         </div>
 
         <div>
           <label
             htmlFor="password"
-            className="mb-1.5 block text-sm font-medium text-[var(--color-ink)]"
+            className={`mb-1.5 block text-sm font-medium text-[var(--color-ink)] ${
+              isUrdu ? 'text-end font-[family-name:var(--font-urdu)]' : 'text-start'
+            }`}
           >
             {t('password')}
           </label>
-          <div className="relative">
+          {/* Whole control is LTR so pe-* padding and the eye icon share the same side */}
+          <div className="relative w-full" dir="ltr">
             <input
               id="password"
               name="password"
               type={showPassword ? 'text' : 'password'}
               required
-              className="w-full rounded-md border border-[var(--color-border)] px-3 py-2 pe-10 text-sm outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
+              autoComplete="current-password"
+              className="w-full rounded-md border border-[var(--color-border)] py-2 ps-3 pe-10 text-left text-sm outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
               placeholder="••••••••"
-              dir="ltr"
             />
             <button
               type="button"
@@ -75,7 +85,11 @@ export default function LoginForm({ error, action }: LoginFormProps) {
         </div>
 
         {error && (
-          <p className="rounded-md bg-[var(--color-emergency)]/10 px-3 py-2 text-sm text-[var(--color-emergency)]">
+          <p
+            className={`rounded-md bg-[var(--color-emergency)]/10 px-3 py-2 text-sm text-[var(--color-emergency)] ${
+              isUrdu ? 'text-end font-[family-name:var(--font-urdu)]' : 'text-start'
+            }`}
+          >
             {error}
           </p>
         )}

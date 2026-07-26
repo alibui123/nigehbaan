@@ -39,7 +39,7 @@ export default async function LoginPage({
       </svg>
 
       <div className="relative z-10 w-full max-w-sm">
-        <div className="mb-8 text-center">
+        <div className={`mb-8 text-center ${locale === 'ur' ? 'font-[family-name:var(--font-urdu)]' : ''}`}>
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-primary)]">
             <span className="font-mono text-lg font-semibold text-white">N</span>
           </div>
@@ -53,7 +53,11 @@ export default async function LoginPage({
 
         <LoginForm error={error} action={signIn} />
 
-        <p className="mt-6 text-center font-mono text-xs text-[var(--color-ink)]/40">
+        <p
+          className={`mt-6 text-center text-xs text-[var(--color-ink)]/40 ${
+            locale === 'ur' ? 'font-[family-name:var(--font-urdu)]' : 'font-mono'
+          }`}
+        >
           {t('footer')}
         </p>
       </div>
