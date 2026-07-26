@@ -24,14 +24,16 @@ interface LayerToggle {
   labelKey: string
   defaultVisible: boolean
 }
-/** GloFAS WMS-T (S2) — flood summary days 1–30 (2/5/20-yr exceedance). */
-const GLOFAS_WMS_BASE = 'https://ows.globalfloods.eu/glofas-ows/ows.py'
+/** GloFAS WMS-T (S2) — proxied via /api/map/glofas-wms (retries + same-origin). */
 const GLOFAS_WMS_LAYER = 'sumAL43EGE'
+const GLOFAS_TILE_URL =
+  `/api/map/glofas-wms?LAYERS=${GLOFAS_WMS_LAYER}` +
+  `&WIDTH=256&HEIGHT=256&BBOX={bbox-epsg-3857}`
 
 const LAYER_TOGGLES: LayerToggle[] = [
   { id: 'flood',        labelKey: 'layerFlood',        defaultVisible: true  },
-  // Off by default — Copernicus GloFAS OWS is often flaky (502s) and floods
-  // the console with MapLibre AJAXError when left on. Users can still enable it.
+  // Off by default — Copernicus GloFAS OWS is often flaky (502s). Toggle to enable;
+  // tiles go through our proxy with retries so intermittent outages recover.
   { id: 'glofas',       labelKey: 'layerGlofas',       defaultVisible: false },
   { id: 'ffd',          labelKey: 'layerFfd',          defaultVisible: true  },
   { id: 'fires',        labelKey: 'layerFires',        defaultVisible: true  },
@@ -108,7 +110,8 @@ export default function DashboardMap() {
   const [layersOpen, setLayersOpen] = useState(false)
   const [legendOpen, setLegendOpen] = useState(false)
   const [layerNotice, setLayerNotice] = useState<string | null>(null)
-  const glofasFailHandled = useRef(false)
+  const glofasFailCount = useRef(0)
+  const glofasNoticeShown = useRef(false)
   const layersControlRef = useRef<HTMLDivElement>(null)
   const legendControlRef = useRef<HTMLDivElement>(null)
 
@@ -145,19 +148,22 @@ export default function DashboardMap() {
   const handleToggle = useCallback((toggleId: string) => {
     setVisibility((prev) => {
       const nextOn = !prev[toggleId]
-      // Reset fail latch when the user explicitly re-enables GloFAS
+      // Reset GloFAS health tracking when the user explicitly re-enables it
       if (toggleId === 'glofas' && nextOn) {
-        glofasFailHandled.current = false
+        glofasFailCount.current = 0
+        glofasNoticeShown.current = false
         setLayerNotice(null)
       }
       return { ...prev, [toggleId]: nextOn }
     })
   }, [])
 
-  const disableGlofasAfterFailure = useCallback(() => {
-    if (glofasFailHandled.current) return
-    glofasFailHandled.current = true
-    setVisibility((prev) => (prev.glofas ? { ...prev, glofas: false } : prev))
+  /** Soft degrade: notice only — do not force the layer off (proxy may still recover). */
+  const noteGlofasDegraded = useCallback((force = false) => {
+    glofasFailCount.current += 1
+    if (glofasNoticeShown.current) return
+    if (!force && glofasFailCount.current < 3) return
+    glofasNoticeShown.current = true
     setLayerNotice(t('glofasUnavailable'))
   }, [t])
 
@@ -176,6 +182,37 @@ export default function DashboardMap() {
     })
   }, [])
 
+  // When GloFAS is on, probe upstream through our proxy so we can show a notice
+  // without auto-disabling the layer (tiles stay soft-failed as transparent PNGs).
+  useEffect(() => {
+    if (!visibility.glofas) return
+    let cancelled = false
+
+    async function probe() {
+      try {
+        const res = await fetch('/api/map/glofas-wms?probe=1', { cache: 'no-store' })
+        const data = (await res.json().catch(() => null)) as { ok?: boolean } | null
+        if (cancelled) return
+        if (data?.ok) {
+          glofasFailCount.current = 0
+          glofasNoticeShown.current = false
+          setLayerNotice(null)
+        } else {
+          noteGlofasDegraded(true)
+        }
+      } catch {
+        if (!cancelled) noteGlofasDegraded(true)
+      }
+    }
+
+    void probe()
+    const id = window.setInterval(probe, 60_000)
+    return () => {
+      cancelled = true
+      window.clearInterval(id)
+    }
+  }, [visibility.glofas, noteGlofasDegraded])
+
   const onMapLoad = useCallback(
     (e: { target: { on: (type: string, listener: (ev: unknown) => void) => void } }) => {
       const map = e.target
@@ -189,15 +226,16 @@ export default function DashboardMap() {
         const isGlofas =
           haystack.includes('glofas') ||
           haystack.includes('globalfloods') ||
+          haystack.includes('/api/map/glofas') ||
           event.sourceId === 'glofas-wms'
         if (isGlofas) {
-          disableGlofasAfterFailure()
+          noteGlofasDegraded()
         }
       })
 
       markMapReady()
     },
-    [disableGlofasAfterFailure, markMapReady]
+    [noteGlofasDegraded, markMapReady]
   )
 
   // Track which layers have been activated at least once to defer initial fetch
@@ -478,17 +516,12 @@ export default function DashboardMap() {
       layers: [{ id: 'carto-light-layer', type: 'raster', source: 'carto-light' }],
     }
 
-    // S2 — GloFAS WMS-T exceedance overlay (Copernicus EMS). MapLibre expands
-    // {bbox-epsg-3857} per tile so no proxy/ingest job is required.
+    // S2 — GloFAS WMS-T exceedance overlay via same-origin proxy (retries upstream).
     // Keep braces literal — URLSearchParams would encode them and break substitution.
     if (visibility.glofas) {
-      const tileUrl =
-        `${GLOFAS_WMS_BASE}?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap` +
-        `&FORMAT=image/png&TRANSPARENT=TRUE&LAYERS=${GLOFAS_WMS_LAYER}` +
-        `&CRS=EPSG:3857&STYLES=&WIDTH=256&HEIGHT=256&BBOX={bbox-epsg-3857}`
       style.sources['glofas-wms'] = {
         type: 'raster',
-        tiles: [tileUrl],
+        tiles: [GLOFAS_TILE_URL],
         tileSize: 256,
         attribution: 'GloFAS © Copernicus EMS / ECMWF',
       }

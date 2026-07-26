@@ -82,7 +82,7 @@
     "kpiShortDelivery": "Deliv",
     "liveStatus": "Live status",
     "liveOk": "Clear",
-    "glofasUnavailable": "GloFAS flood overlay is temporarily unavailable (upstream 502). Turn it back on from Layers when the service recovers.",
+    "glofasUnavailable": "GloFAS upstream is slow or unavailable — tiles may look empty until Copernicus recovers. Leave the layer on; it will fill in when the service returns.",
     "dismissNotice": "Dismiss"
   },
   "Alerts": {

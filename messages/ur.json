@@ -82,7 +82,7 @@
     "kpiShortDelivery": "ترسیل",
     "liveStatus": "لائیو صورتحال",
     "liveOk": "صاف",
-    "glofasUnavailable": "GloFAS سیلاب کی تہہ عارضی طور پر دستیاب نہیں (upstream 502)۔ سروس بحال ہونے پر Layers سے دوبارہ چالو کریں۔",
+    "glofasUnavailable": "GloFAS اپ اسٹریم سست یا دستیاب نہیں — Copernicus بحال ہونے تک ٹائلز خالی لگ سکتی ہیں۔ تہہ آن رکھیں؛ سروس واپس آنے پر بھر جائے گی۔",
     "dismissNotice": "بند کریں"
   },
   "Alerts": {
