@@ -18,6 +18,7 @@ import {
   provinceDisplayName,
 } from '@/lib/localized'
 import PageHeader from '../../../PageHeader'
+import WorkflowSubmitButton from '../WorkflowSubmitButton'
 
 export default async function DisseminationBoardPage({
   params,
@@ -236,33 +237,27 @@ export default async function DisseminationBoardPage({
             <div className="flex flex-wrap gap-3">
               {(dryRunPlanned || !hasDeliveries) && (
                 <form action={executeDryRunDispatch.bind(null, id, districtId, locale)}>
-                  <button
-                    type="submit"
+                  <WorkflowSubmitButton
+                    label={dryRunPlanned ? 'Execute dry run (queue messages)' : 'Dispatch (dry run)'}
                     disabled={!recipientCounts || recipientCounts.length === 0}
-                    className="rounded-md bg-[var(--color-emergency)] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {dryRunPlanned ? 'Execute dry run (queue messages)' : 'Dispatch (dry run)'}
-                  </button>
+                    className="rounded-md bg-[var(--color-emergency)] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700"
+                  />
                 </form>
               )}
               {twilioSmsConfigured && (
                 <form action={executeLiveDispatch.bind(null, id, districtId, locale, 'sms')}>
-                  <button
-                    type="submit"
+                  <WorkflowSubmitButton
+                    label="Send live SMS (Twilio)"
                     className="rounded-md border-2 border-[var(--color-emergency)] bg-transparent px-4 py-2 text-sm font-semibold text-[var(--color-emergency)] hover:bg-[var(--color-emergency)]/10"
-                  >
-                    Send live SMS (Twilio)
-                  </button>
+                  />
                 </form>
               )}
               {twilioWhatsAppConfigured && (
                 <form action={executeLiveDispatch.bind(null, id, districtId, locale, 'whatsapp')}>
-                  <button
-                    type="submit"
+                  <WorkflowSubmitButton
+                    label="Send live WhatsApp (Twilio)"
                     className="rounded-md border-2 border-emerald-600 bg-transparent px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50"
-                  >
-                    Send live WhatsApp (Twilio)
-                  </button>
+                  />
                 </form>
               )}
             </div>
@@ -306,12 +301,10 @@ export default async function DisseminationBoardPage({
                     <span className="ml-2 font-mono text-xs uppercase text-[var(--color-ink)]/40">{d.status}</span>
                   </span>
                   <form action={acknowledgeDelivery.bind(null, d.id, locale)}>
-                    <button
-                      type="submit"
+                    <WorkflowSubmitButton
+                      label="Acknowledge"
                       className="rounded-md bg-[var(--color-primary)] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[var(--color-primary-hover)]"
-                    >
-                      Acknowledge
-                    </button>
+                    />
                   </form>
                 </div>
               ))}

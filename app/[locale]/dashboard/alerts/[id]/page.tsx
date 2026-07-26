@@ -1,11 +1,12 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
-import Link from 'next/link'
 import { revalidatePath } from 'next/cache'
 import PrintButton from './PrintButton'
 import AuditTimeline from './AuditTimeline'
 import { logAudit, type AuditLogRow } from '@/lib/audit'
 import CapEditorForm from './CapEditorForm'
+import WorkflowSubmitButton from './WorkflowSubmitButton'
+import PendingNavButton from './PendingNavButton'
 import {
   getAllowedTransitions,
   canEscalate,
@@ -276,16 +277,14 @@ export default async function AlertComposerPage({
                   <input type="hidden" name="id" value={alert.id} />
                   <input type="hidden" name="new_status" value={primaryAction} />
                   <input type="hidden" name="locale" value={locale} />
-                  <button
-                    type="submit"
+                  <WorkflowSubmitButton
+                    label={workflowLabel(td, alert.status, primaryAction)}
                     className={`rounded-md px-4 py-2 text-sm font-semibold text-white shadow-sm ${
                       primaryAction === 'issued'
                         ? 'bg-[var(--color-emergency)] hover:bg-red-700'
                         : 'bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)]'
                     }`}
-                  >
-                    {workflowLabel(td, alert.status, primaryAction)}
-                  </button>
+                  />
                 </form>
               )}
               {secondaryActions.map((next) => (
@@ -293,28 +292,24 @@ export default async function AlertComposerPage({
                   <input type="hidden" name="id" value={alert.id} />
                   <input type="hidden" name="new_status" value={next} />
                   <input type="hidden" name="locale" value={locale} />
-                  <button
-                    type="submit"
+                  <WorkflowSubmitButton
+                    label={workflowLabel(td, alert.status, next)}
                     className={`rounded-md px-4 py-2 text-sm font-semibold shadow-sm ${
                       next === 'cancelled' || next === 'dismissed'
                         ? 'border border-[var(--color-border)] bg-transparent text-[var(--color-ink)] hover:bg-[var(--color-border)]'
                         : 'bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)]'
                     }`}
-                  >
-                    {workflowLabel(td, alert.status, next)}
-                  </button>
+                  />
                 </form>
               ))}
               {showEscalate && (
                 <form action={escalateAlertSeverity}>
                   <input type="hidden" name="id" value={alert.id} />
                   <input type="hidden" name="locale" value={locale} />
-                  <button
-                    type="submit"
+                  <WorkflowSubmitButton
+                    label={`Escalate to ${nextSeverity}`}
                     className="rounded-md border-2 border-[var(--color-emergency)] bg-transparent px-4 py-2 text-sm font-semibold text-[var(--color-emergency)] hover:bg-[var(--color-emergency)]/10"
-                  >
-                    Escalate to {nextSeverity}
-                  </button>
+                  />
                 </form>
               )}
             </div>
@@ -324,12 +319,12 @@ export default async function AlertComposerPage({
         {capExportable && (
           <div className="flex flex-wrap gap-3">
             {alert.status === 'issued' && (
-              <Link
+              <PendingNavButton
                 href={`/${locale}/dashboard/alerts/${alert.id}/dissemination`}
+                label="Dissemination Board"
+                pendingLabel="Opening board…"
                 className="rounded-md bg-[var(--color-emergency)] px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
-              >
-                Dissemination Board
-              </Link>
+              />
             )}
             <a
               href={`/api/alerts/${alert.id}/cap.json`}
