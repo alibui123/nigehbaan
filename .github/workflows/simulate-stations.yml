@@ -1,12 +1,32 @@
 name: Simulate Station Telemetry
+
+# Keeps station_health online: status goes offline if last reading > 30 minutes.
+# Vercel Hobby only runs crons once/day, so GitHub Actions is the reliable scheduler.
 on:
   schedule:
     - cron: '*/10 * * * *'
   workflow_dispatch:
+
 jobs:
   simulate:
     runs-on: ubuntu-latest
     steps:
       - name: Call simulator endpoint
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          APP_URL: ${{ secrets.APP_URL }}
         run: |
-          curl -f -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" https://nigheban-ews.vercel.app/api/simulate/stations
+          set -euo pipefail
+          if [ -z "${CRON_SECRET:-}" ]; then
+            echo "Missing secret CRON_SECRET" >&2
+            exit 1
+          fi
+          if [ -z "${APP_URL:-}" ]; then
+            echo "Missing secret APP_URL (e.g. https://your-app.vercel.app)" >&2
+            exit 1
+          fi
+          BASE="${APP_URL%/}"
+          echo "POST simulate → ${BASE}/api/simulate/stations"
+          curl -fsS --max-time 90 \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "${BASE}/api/simulate/stations"

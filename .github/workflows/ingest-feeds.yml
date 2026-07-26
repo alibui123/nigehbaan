@@ -1,0 +1,40 @@
+name: Ingest feeds (daily)
+
+# Backup for Vercel cron — fires the same ingest routes GitHub can reach.
+on:
+  schedule:
+    - cron: '15 1 * * *'
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        path:
+          - /api/ingest/flood-open-meteo
+          - /api/ingest/open-meteo
+          - /api/ingest/usgs
+          - /api/ingest/firms
+          - /api/ingest/pmd-snapshot
+          - /api/ingest/irsa
+          - /api/ingest/drought
+          - /api/ingest/advisories
+    steps:
+      - name: Trigger ${{ matrix.path }}
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          APP_URL: ${{ secrets.APP_URL }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CRON_SECRET:-}" ] || [ -z "${APP_URL:-}" ]; then
+            echo "Set repository secrets CRON_SECRET and APP_URL" >&2
+            exit 1
+          fi
+          BASE="${APP_URL%/}"
+          echo "GET ${BASE}${{ matrix.path }}"
+          curl -fsS --max-time 90 \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "${BASE}${{ matrix.path }}"

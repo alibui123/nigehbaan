@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server'
 
 const SOURCE = 'station_sim'
 
-const OUTAGE_PROBABILITY = 0.15
+const OUTAGE_PROBABILITY = 0.05
 const BATTERY_REPLACEMENT_PROBABILITY = 0.05
 const LOW_BATTERY_THRESHOLD = 10.5
 const FRESH_BATTERY_VOLTAGE = 12.6

@@ -8,7 +8,9 @@
     "backToOverview": "→ صوبائی جائزہ",
     "switchLanguage": "زبان تبدیل کریں",
     "english": "EN",
-    "urdu": "اردو"
+    "urdu": "اردو",
+    "loading": "لوڈ ہو رہا ہے…",
+    "loadingMap": "نقشہ اور حدود لوڈ ہو رہی ہیں…"
   },
   "Login": {
     "tagline": "کثیر خطرات کا ابتدائی انتباہی پلیٹ فارم",
@@ -59,7 +61,29 @@
     "layerGlacial": "برفانی جھیلیں",
     "layerStations": "فیلڈ اسٹیشنز",
     "layerSnow": "NASA برف کی تہہ",
-    "openNav": "نیویگیشن مینو کھولیں"
+    "openNav": "نیویگیشن مینو کھولیں",
+    "openMapLayers": "نقشے کی تہیں کھولیں",
+    "closeMapLayers": "نقشے کی تہیں بند کریں",
+    "openLegend": "اشاریہ کھولیں",
+    "closeLegend": "اشاریہ بند کریں",
+    "collapseSidebar": "سائیڈ بار سمیٹیں",
+    "expandSidebar": "سائیڈ بار پھیلائیں",
+    "navMap": "نقشہ",
+    "navStations": "اسٹیشنز",
+    "navMore": "مزید",
+    "navMenu": "مینو",
+    "closeNav": "مینو بند کریں",
+    "dataFeeds": "فیڈز",
+    "sheetOpen": "کھولیں",
+    "sheetClose": "بند",
+    "kpiShortWarnings": "انتباہ",
+    "kpiShortDistricts": "ضلع",
+    "kpiShortPopulation": "آبادی",
+    "kpiShortDelivery": "ترسیل",
+    "liveStatus": "لائیو صورتحال",
+    "liveOk": "صاف",
+    "glofasUnavailable": "GloFAS سیلاب کی تہہ عارضی طور پر دستیاب نہیں (upstream 502)۔ سروس بحال ہونے پر Layers سے دوبارہ چالو کریں۔",
+    "dismissNotice": "بند کریں"
   },
   "Alerts": {
     "candidateReview": "الرٹ امیدواروں کا جائزہ",
@@ -168,6 +192,7 @@
       "returnToDraft": "مسودے پر واپس",
       "dismiss": "مسترد کریں",
       "cancel": "الرٹ منسوخ کریں",
+      "markExpired": "میعاد ختم کریں",
       "transition": "{from} → {to}"
     },
     "map": {
@@ -178,6 +203,7 @@
       "rate": "شرح",
       "class": "درجہ",
       "glacialLake": "برفانی جھیل",
+      "downstreamPopulation": "نیچے کی آبادی",
       "station": "اسٹیشن",
       "openDistrict": "ضلعی کنسول کھولنے کے لیے کلک کریں",
       "cusecs": "کیوسیکس"

@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
-import Link from 'next/link'
 import { executeDryRunDispatch, executeLiveDispatch, acknowledgeDelivery } from '../dissemination-actions'
 import AckSimulator from './ack-simulator'
 import { buildSmsBody, segmentSms, CHANNEL_LABELS } from '@/lib/dissemination'
@@ -18,6 +17,7 @@ import {
   localizeAlertFields,
   provinceDisplayName,
 } from '@/lib/localized'
+import PageHeader from '../../../PageHeader'
 
 export default async function DisseminationBoardPage({
   params,
@@ -94,23 +94,27 @@ export default async function DisseminationBoardPage({
   )
 
   return (
-    <div className="min-h-screen bg-[var(--color-base)]">
-      <header className="flex items-center gap-4 border-b border-[var(--color-border)] bg-[var(--color-primary)] px-6 py-4">
-        <Link href={`/${locale}/dashboard/alerts/${id}`} className="text-sm text-white/70 hover:text-white">
-          ← {staff ? 'CAP Composer' : 'Alert Detail'}
-        </Link>
-        <h1 className="text-lg font-semibold text-white">Dissemination Board</h1>
-        <span className="ml-auto rounded-full bg-white/10 px-3 py-1 font-mono text-xs uppercase text-white">
-          {alert.status}
-        </span>
-        {role && (
-          <span className="rounded-full bg-white/5 px-3 py-1 font-mono text-xs uppercase text-white/70">
-            {role.replace('_', ' ')}
-          </span>
-        )}
-      </header>
+    <div className="min-h-dvh bg-[var(--color-base)]">
+      <PageHeader
+        locale={locale}
+        title="Dissemination Board"
+        backHref={`/${locale}/dashboard/alerts/${id}`}
+        backLabel={`← ${staff ? 'CAP Composer' : 'Alert Detail'}`}
+        trailing={
+          <div className="flex items-center gap-1.5">
+            <span className="rounded-full bg-white/10 px-2 py-1 font-mono text-[10px] uppercase text-white sm:px-3 sm:text-xs">
+              {alert.status}
+            </span>
+            {role && (
+              <span className="hidden rounded-full bg-white/5 px-3 py-1 font-mono text-xs uppercase text-white/70 sm:inline">
+                {role.replace('_', ' ')}
+              </span>
+            )}
+          </div>
+        }
+      />
 
-      <div className="mx-auto max-w-3xl space-y-6 p-6">
+      <div className="dashboard-page-body mx-auto max-w-3xl space-y-4 px-3 pt-4 sm:space-y-6 sm:px-6 sm:pt-6">
         <div className={sectionClass}>
           <h2 className={headingClass}>Issuing</h2>
           <p className="text-sm text-[var(--color-ink)]">

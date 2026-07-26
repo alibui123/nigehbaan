@@ -57,3 +57,4 @@ export async function GET() {
 
   return NextResponse.json({ type: 'FeatureCollection', features })
 }
+

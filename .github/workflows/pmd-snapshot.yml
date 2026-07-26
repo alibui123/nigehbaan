@@ -2,7 +2,7 @@ name: PMD FFD ingest
 
 on:
   schedule:
-    # Mirror vercel.json — 00:40 and 12:40 UTC (~05:40 / 17:40 PKT)
+    # 00:40 and 12:40 UTC (~05:40 / 17:40 PKT)
     - cron: '40 0,12 * * *'
   workflow_dispatch:
 
@@ -11,7 +11,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger PMD snapshot ingest
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          APP_URL: ${{ secrets.APP_URL }}
         run: |
-          curl -f --max-time 90 \
-            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            "https://nigheban-ews.vercel.app/api/ingest/pmd-snapshot"
+          set -euo pipefail
+          if [ -z "${CRON_SECRET:-}" ]; then
+            echo "Missing secret CRON_SECRET" >&2
+            exit 1
+          fi
+          if [ -z "${APP_URL:-}" ]; then
+            echo "Missing secret APP_URL (e.g. https://your-app.vercel.app)" >&2
+            exit 1
+          fi
+          BASE="${APP_URL%/}"
+          echo "GET pmd-snapshot → ${BASE}/api/ingest/pmd-snapshot"
+          curl -fsS --max-time 90 \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "${BASE}/api/ingest/pmd-snapshot"

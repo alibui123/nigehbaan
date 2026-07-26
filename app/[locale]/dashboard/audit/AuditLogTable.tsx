@@ -115,8 +115,15 @@ export default function AuditLogTable({
         </div>
       </form>
 
-      <div className="overflow-hidden rounded-lg border border-[var(--color-border)] bg-white shadow-sm">
-        <table className="w-full text-left text-sm text-[var(--color-ink)]">
+      <div className="-mx-3 overflow-x-auto sm:mx-0">
+        <div className="inline-block min-w-full overflow-hidden rounded-lg border border-[var(--color-border)] bg-white shadow-sm sm:rounded-lg">
+        {/* Audit rows are English system events — keep Inter + LTR so Nastaliq
+            metrics don't crush multi-word action labels in Urdu locale. */}
+        <table
+          dir="ltr"
+          lang="en"
+          className="w-full min-w-[640px] text-left font-sans text-sm leading-normal text-[var(--color-ink)]"
+        >
           <thead className="bg-[var(--color-surface)] text-xs uppercase text-[var(--color-ink)]/60">
             <tr>
               <th className="px-4 py-3 font-semibold">Timestamp (PKT)</th>
@@ -130,16 +137,16 @@ export default function AuditLogTable({
             {logs.length > 0 ? (
               logs.map((log) => (
                 <tr key={log.id} className="hover:bg-[var(--color-surface)]">
-                  <td className="whitespace-nowrap px-4 py-3 font-mono text-xs text-[var(--color-ink)]/70">
+                  <td className="whitespace-nowrap px-4 py-3 font-mono text-xs leading-normal text-[var(--color-ink)]/70">
                     {formatAuditTimestamp(log.at)}
                   </td>
                   <td className="px-4 py-3">
-                    <span className="rounded bg-[var(--color-border)] px-2 py-0.5 text-xs font-semibold">
+                    <span className="inline-block max-w-[14rem] rounded bg-[var(--color-border)] px-2 py-1 font-sans text-xs font-semibold leading-snug text-[var(--color-ink)]">
                       {actionLabel(log.action)}
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="text-xs">{log.entity || '—'}</div>
+                    <div className="text-xs leading-snug">{log.entity || '—'}</div>
                     {log.entity === 'alert_candidate' && log.entity_id && (
                       <Link
                         href={`/${locale}/dashboard/alerts/${log.entity_id}`}
@@ -149,11 +156,11 @@ export default function AuditLogTable({
                       </Link>
                     )}
                   </td>
-                  <td className="max-w-xs truncate px-4 py-3 font-mono text-xs text-[var(--color-ink)]/50">
+                  <td className="max-w-xs truncate px-4 py-3 font-mono text-xs leading-normal text-[var(--color-ink)]/50">
                     {formatDetail(log.detail) || '—'}
                   </td>
                   <td className="px-4 py-3">
-                    <span className="text-xs font-semibold text-blue-600">
+                    <span className="text-xs font-semibold leading-snug text-blue-600">
                       {log.actor_role?.toUpperCase() || 'SYSTEM'}
                     </span>
                   </td>
@@ -168,6 +175,7 @@ export default function AuditLogTable({
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
       {totalPages > 1 && (

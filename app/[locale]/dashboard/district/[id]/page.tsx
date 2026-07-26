@@ -13,6 +13,7 @@ import {
   localizeAlertFields,
   provinceDisplayName,
 } from '@/lib/localized'
+import PageHeader from '../../PageHeader'
 
 type HazardRow = {
   id: string
@@ -115,22 +116,28 @@ export default async function DistrictConsolePage({
   const districtName = districtDisplayName(locale, district.name_en, district.name_ur)
   const provinceName = provinceDisplayName(locale, district.province)
 
-  return (
-    <div className="min-h-screen bg-[var(--color-base)]">
-      <header className="border-b border-[var(--color-border)] bg-[var(--color-primary)] px-6 py-4">
-        <Link href={`/${locale}/dashboard`} className="text-sm text-white/70 hover:text-white">
-          {tc('backToOverview')}
-        </Link>
-        <h1 className="mt-1 text-xl font-semibold text-white">{districtName}</h1>
-        <p className="text-sm text-white/70">
-          {provinceName} · {district.adm2_code}
-          {district.population
-            ? ` · ${td('district.population', { count: district.population.toLocaleString(locale === 'ur' ? 'ur-PK' : 'en-GB') })}`
-            : ''}
-        </p>
-      </header>
+  const subtitle = [
+    provinceName,
+    district.adm2_code,
+    district.population
+      ? td('district.population', {
+          count: district.population.toLocaleString(locale === 'ur' ? 'ur-PK' : 'en-GB'),
+        })
+      : null,
+  ]
+    .filter(Boolean)
+    .join(' · ')
 
-      <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-2">
+  return (
+    <div className="min-h-dvh bg-[var(--color-base)]">
+      <PageHeader
+        locale={locale}
+        title={districtName}
+        subtitle={subtitle}
+        backLabel={tc('backToOverview')}
+      />
+
+      <div className="dashboard-page-body grid grid-cols-1 gap-4 px-3 pt-4 sm:gap-6 sm:px-6 sm:pt-6 md:grid-cols-2">
         {/* Weather strip */}
         <section className={sectionClass}>
           <h2 className={headingClass}>{td('district.weather')} (Open-Meteo)</h2>

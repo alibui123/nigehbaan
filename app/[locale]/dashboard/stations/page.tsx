@@ -1,12 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import StationHealthMapClient from './StationHealthMapClient'
-import StationHealthRollup from './StationHealthRollup'
-import StationHealthClient from './StationHealthClient'
+import StationHealthExplorer from './StationHealthExplorer'
 import type { StationHealthRow } from '@/lib/station-health'
 import { enrichDistrictNameUr } from '@/lib/localized'
+import PageHeader from '../PageHeader'
 
 export default async function StationHealthPage({
   params,
@@ -39,7 +38,7 @@ export default async function StationHealthPage({
 
   const metaById = new Map(
     (stationMeta ?? []).map((s) => {
-      const district = s.district as { name_en: string; name_ur: string | null } | null
+      const district = s.district as unknown as { name_en: string; name_ur: string | null } | null
       return [
         s.id,
         {
@@ -82,25 +81,25 @@ export default async function StationHealthPage({
   const openTicketCount = ticketsWithNames.filter((ticket) => ticket.status === 'open').length
 
   return (
-    <div className="min-h-screen bg-[var(--color-base)]">
-      <header className="border-b border-[var(--color-border)] bg-[var(--color-primary)] px-6 py-4">
-        <Link href={`/${locale}/dashboard`} className="text-sm text-white/70 hover:text-white">
-          {tc('backToOverview')}
-        </Link>
-        <h1 className="mt-1 text-xl font-semibold text-white">{t('title')}</h1>
-        <p className="text-sm text-white/70">
-          {t('subtitle')}
-        </p>
-      </header>
+    <div className="min-h-dvh bg-[var(--color-base)]">
+      <PageHeader
+        locale={locale}
+        title={t('title')}
+        subtitle={t('subtitle')}
+        backLabel={tc('backToOverview')}
+      />
 
-      <div className="space-y-6 p-6">
-        <StationHealthRollup stations={stationRows} openTicketCount={openTicketCount} />
-
-        <div className="h-[420px] overflow-hidden rounded-lg border border-[var(--color-border)]">
-          <StationHealthMapClient />
-        </div>
-
-        <StationHealthClient stations={stationRows} tickets={ticketsWithNames} />
+      <div className="dashboard-page-body space-y-4 px-3 pt-4 sm:space-y-6 sm:px-6 sm:pt-6">
+        <StationHealthExplorer
+          stations={stationRows}
+          openTicketCount={openTicketCount}
+          tickets={ticketsWithNames}
+          map={
+            <div className="h-[280px] overflow-hidden rounded-2xl border border-[var(--color-border)] sm:h-[420px] sm:rounded-lg">
+              <StationHealthMapClient />
+            </div>
+          }
+        />
       </div>
     </div>
   )

@@ -7,9 +7,20 @@ import { districtDisplayName } from '@/lib/localized'
 interface StationHealthRollupProps {
   stations: StationHealthRow[]
   openTicketCount: number
+  selectedValley: string | null
+  selectedDistrict: string | null
+  onSelectValley: (valley: string) => void
+  onSelectDistrict: (district: string) => void
 }
 
-export default function StationHealthRollup({ stations, openTicketCount }: StationHealthRollupProps) {
+export default function StationHealthRollup({
+  stations,
+  openTicketCount,
+  selectedValley,
+  selectedDistrict,
+  onSelectValley,
+  onSelectDistrict,
+}: StationHealthRollupProps) {
   const locale = useLocale()
   const stats = computeRollup(stations, openTicketCount)
   const byValley = groupBreakdown(stations, (s) => s.valley ?? '—')
@@ -50,11 +61,15 @@ export default function StationHealthRollup({ stations, openTicketCount }: Stati
           title={locale === 'ur' ? 'وادی کے لحاظ سے' : 'By Valley'}
           rows={byValley}
           locale={locale}
+          selected={selectedValley}
+          onSelect={onSelectValley}
         />
         <BreakdownTable
           title={locale === 'ur' ? 'ضلع کے لحاظ سے' : 'By District'}
           rows={byDistrict}
           locale={locale}
+          selected={selectedDistrict}
+          onSelect={onSelectDistrict}
         />
       </div>
     </section>
@@ -65,10 +80,14 @@ function BreakdownTable({
   title,
   rows,
   locale,
+  selected,
+  onSelect,
 }: {
   title: string
   rows: { label: string; total: number; reporting: number; offline: number; lowBattery: number }[]
   locale: string
+  selected: string | null
+  onSelect: (label: string) => void
 }) {
   return (
     <div className="overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]">
@@ -87,16 +106,50 @@ function BreakdownTable({
           </tr>
         </thead>
         <tbody>
-          {rows.slice(0, 12).map((r) => (
-            <tr key={r.label} className="border-t border-[var(--color-border)]">
-              <td className="px-4 py-2">{r.label}</td>
-              <td className="px-4 py-2 font-mono">
-                {r.reporting}/{r.total}
-              </td>
-              <td className="px-4 py-2 font-mono text-[var(--color-emergency)]">{r.offline}</td>
-              <td className="px-4 py-2 font-mono text-[#E0A030]">{r.lowBattery}</td>
-            </tr>
-          ))}
+          {rows.slice(0, 12).map((r, index) => {
+            // "—" (no valley assigned) isn't a meaningful filter target
+            const isFilterable = r.label !== '—'
+            const isSelected = selected === r.label
+
+            return (
+              <tr
+                key={`${title}-${r.label}-${index}`}
+                role={isFilterable ? 'button' : undefined}
+                tabIndex={isFilterable ? 0 : undefined}
+                aria-pressed={isFilterable ? isSelected : undefined}
+                aria-label={isFilterable ? `${title}: ${r.label}` : undefined}
+                onClick={isFilterable ? () => onSelect(r.label) : undefined}
+                onKeyDown={
+                  isFilterable
+                    ? (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          onSelect(r.label)
+                        }
+                      }
+                    : undefined
+                }
+                className={`border-t border-[var(--color-border)] transition-colors duration-150 ${
+                  isFilterable
+                    ? 'cursor-pointer hover:bg-[var(--color-primary)]/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-primary-hover)]'
+                    : ''
+                } ${isSelected ? 'bg-[var(--color-primary)]/10' : ''}`}
+              >
+                <td
+                  className={`px-4 py-2 ${
+                    isSelected ? 'font-semibold text-[var(--color-primary-hover)]' : ''
+                  }`}
+                >
+                  {r.label}
+                </td>
+                <td className="px-4 py-2 font-mono">
+                  {r.reporting}/{r.total}
+                </td>
+                <td className="px-4 py-2 font-mono text-[var(--color-emergency)]">{r.offline}</td>
+                <td className="px-4 py-2 font-mono text-[#E0A030]">{r.lowBattery}</td>
+              </tr>
+            )
+          })}
         </tbody>
       </table>
     </div>

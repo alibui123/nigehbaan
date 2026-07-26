@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache'
 import PrintButton from './PrintButton'
 import AuditTimeline from './AuditTimeline'
 import { logAudit, type AuditLogRow } from '@/lib/audit'
-import { z } from 'zod'
+import CapEditorForm from './CapEditorForm'
 import {
   getAllowedTransitions,
   canEscalate,
@@ -23,67 +23,7 @@ import {
   provinceDisplayName,
   workflowLabel,
 } from '@/lib/localized'
-
-const CAPSchema = z.object({
-  event_en: z.string().min(1, 'English event name is required'),
-  event_ur: z.string().optional().nullable(),
-  urgency: z.enum(['immediate', 'expected', 'future', 'past']).nullable(),
-  certainty: z.enum(['observed', 'likely', 'possible', 'unlikely']).nullable(),
-  headline_en: z.string().optional().nullable(),
-  headline_ur: z.string().optional().nullable(),
-  instructions_en: z.string().optional().nullable(),
-  instructions_ur: z.string().optional().nullable(),
-  severity: z.enum(['emergency', 'warning', 'watch', 'advisory']),
-})
-
-async function updateCapFields(formData: FormData) {
-  'use server'
-  const id = formData.get('id') as string
-  const locale = (formData.get('locale') as string) || 'en'
-  const supabase = await createClient()
-
-  const emptyToNull = (v: FormDataEntryValue | null) => {
-    const s = v as string
-    return s && s.trim() !== '' ? s : null
-  }
-
-  const rawData = {
-    event_en: formData.get('event_en'),
-    event_ur: formData.get('event_ur'),
-    urgency: emptyToNull(formData.get('urgency')),
-    certainty: emptyToNull(formData.get('certainty')),
-    headline_en: formData.get('headline_en'),
-    headline_ur: formData.get('headline_ur'),
-    instructions_en: formData.get('instructions_en'),
-    instructions_ur: formData.get('instructions_ur'),
-    severity: formData.get('severity'),
-  }
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Not authenticated')
-  const { data: profile } = await supabase.from('profile').select('role').eq('id', user.id).single()
-  if (!canEditCap(profile?.role as AppRole)) {
-    throw new Error('Only duty officers or DG can edit CAP fields')
-  }
-
-  const parsedData = CAPSchema.safeParse(rawData)
-  if (!parsedData.success) {
-    throw new Error(`Validation failed: ${parsedData.error.message}`)
-  }
-
-  const { error } = await supabase.from('alert_candidate').update(parsedData.data).eq('id', id)
-  if (error) throw new Error(error.message)
-
-  await logAudit(supabase, {
-    action: 'edit_cap_fields',
-    entity: 'alert_candidate',
-    entity_id: id,
-    actor: user.id,
-    actor_role: profile?.role || 'viewer',
-  })
-
-  revalidatePath(`/${locale}/dashboard/alerts/${id}`)
-}
+import PageHeader from '../../PageHeader'
 
 async function transitionStatus(formData: FormData) {
   'use server'
@@ -252,14 +192,14 @@ export default async function AlertComposerPage({
     }
   }
 
-  const allowedNext = getAllowedTransitions(role, alert.status)
+  const allowedNext = getAllowedTransitions(role, alert.status).filter(
+    (status) => status !== 'pending_approval' || role === 'duty_officer'
+  )
   const primaryAction = allowedNext.find((s) => s === 'issued') ?? allowedNext[0]
   const secondaryActions = allowedNext.filter((s) => s !== primaryAction)
   const nextSeverity = escalateSeverity(alert.severity)
   const showEscalate = canEscalate(role, alert.status) && nextSeverity !== null
 
-  const inputClass = 'w-full rounded-md border border-[var(--color-border)] px-3 py-2 text-sm'
-  const labelClass = 'mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-ink)]/60'
   const capExportable = alert.status === 'issued' || alert.status === 'cancelled'
   const localized = localizeAlertFields(locale, alert)
   const districtLabel = alert.district
@@ -267,26 +207,28 @@ export default async function AlertComposerPage({
     : ta('global')
 
   return (
-    <div className="min-h-screen bg-[var(--color-base)]">
-      <header className="print:hidden flex items-center gap-4 border-b border-[var(--color-border)] bg-[var(--color-primary)] px-6 py-4">
-        <Link href={`/${locale}/dashboard/alerts`} className="text-sm text-white/70 hover:text-white">
-          ← {focalReadOnly ? ta('districtAlerts') : ta('candidateReview')}
-        </Link>
-        <h1 className="text-lg font-semibold text-white">
-          {focalReadOnly ? localized.headline : 'CAP Composer'}
-        </h1>
-        <span className="ms-4 rounded-full bg-white/10 px-3 py-1 font-mono text-xs uppercase text-white">
-          {dataLabel(td, 'status', alert.status)}
-        </span>
-        {role && (
-          <span className="rounded-full bg-white/5 px-3 py-1 font-mono text-xs uppercase text-white/70">
-            {role.replace('_', ' ')}
-          </span>
-        )}
-        <PrintButton alertId={alert.id} locale={locale} disabled={!capExportable} />
-      </header>
+    <div className="min-h-dvh bg-[var(--color-base)]">
+      <div className="print:hidden">
+        <PageHeader
+          locale={locale}
+          title={focalReadOnly ? localized.headline : 'CAP Composer'}
+          backHref={`/${locale}/dashboard/alerts`}
+          backLabel={`← ${focalReadOnly ? ta('districtAlerts') : ta('candidateReview')}`}
+          trailing={
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <span className="rounded-full bg-white/10 px-2 py-1 font-mono text-[10px] uppercase text-white sm:px-3 sm:text-xs">
+                {dataLabel(td, 'status', alert.status)}
+              </span>
+              <span className="hidden rounded-full bg-white/5 px-3 py-1 font-mono text-xs uppercase text-white/70 sm:inline">
+                {role?.replace('_', ' ')}
+              </span>
+              <PrintButton alertId={alert.id} locale={locale} disabled={!capExportable} />
+            </div>
+          }
+        />
+      </div>
 
-      <div className="mx-auto max-w-3xl space-y-6 p-6">
+      <div className="dashboard-page-body mx-auto max-w-3xl space-y-4 px-3 pt-4 sm:space-y-6 sm:px-6 sm:pt-6">
         <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
           <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-[var(--color-ink)]/60">Source</h2>
           <p className="text-sm text-[var(--color-ink)]">
@@ -303,87 +245,12 @@ export default async function AlertComposerPage({
           )}
         </div>
 
-        <form action={updateCapFields} className="space-y-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
-          <input type="hidden" name="id" value={alert.id} />
-          <input type="hidden" name="locale" value={locale} />
-          {focalReadOnly && (
-            <p className="rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-900">
-              Read-only CAP view. As district focal you can acknowledge deliveries on the Dissemination Board;
-              composing and approving stay with duty officers / DG.
-            </p>
-          )}
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className={labelClass}>Event (English)</label>
-              <input name="event_en" defaultValue={alert.event_en ?? ''} className={inputClass} required disabled={!canEdit} />
-            </div>
-            <div>
-              <label className={labelClass}>Event (Urdu)</label>
-              <input name="event_ur" defaultValue={alert.event_ur ?? ''} dir="rtl" className={inputClass} disabled={!canEdit} />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <label className={labelClass}>Severity</label>
-              <select name="severity" defaultValue={alert.severity ?? ''} className={inputClass} required disabled={!canEdit}>
-                <option value="advisory">Advisory</option>
-                <option value="watch">Watch</option>
-                <option value="warning">Warning</option>
-                <option value="emergency">Emergency</option>
-              </select>
-            </div>
-            <div>
-              <label className={labelClass}>Urgency</label>
-              <select name="urgency" defaultValue={alert.urgency ?? ''} className={inputClass} disabled={!canEdit}>
-                <option value="">—</option>
-                <option value="immediate">Immediate</option>
-                <option value="expected">Expected</option>
-                <option value="future">Future</option>
-                <option value="past">Past</option>
-              </select>
-            </div>
-            <div>
-              <label className={labelClass}>Certainty</label>
-              <select name="certainty" defaultValue={alert.certainty ?? ''} className={inputClass} disabled={!canEdit}>
-                <option value="">—</option>
-                <option value="observed">Observed</option>
-                <option value="likely">Likely</option>
-                <option value="possible">Possible</option>
-                <option value="unlikely">Unlikely</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className={labelClass}>Headline (English)</label>
-              <input name="headline_en" defaultValue={alert.headline_en ?? alert.title ?? ''} className={inputClass} disabled={!canEdit} />
-            </div>
-            <div>
-              <label className={labelClass}>Headline (Urdu)</label>
-              <input name="headline_ur" defaultValue={alert.headline_ur ?? ''} dir="rtl" className={inputClass} disabled={!canEdit} />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className={labelClass}>Instructions (English)</label>
-              <textarea name="instructions_en" defaultValue={alert.instructions_en ?? ''} rows={4} className={inputClass} disabled={!canEdit} />
-            </div>
-            <div>
-              <label className={labelClass}>Instructions (Urdu)</label>
-              <textarea name="instructions_ur" defaultValue={alert.instructions_ur ?? ''} dir="rtl" rows={4} className={inputClass} disabled={!canEdit} />
-            </div>
-          </div>
-
-          {canEdit && (
-            <button type="submit" className="rounded-md bg-[var(--color-primary)] px-4 py-2 text-sm text-white hover:bg-[var(--color-primary-hover)]">
-              Save CAP Fields
-            </button>
-          )}
-        </form>
+        <CapEditorForm
+          alert={alert}
+          locale={locale}
+          canEdit={canEdit}
+          focalReadOnly={focalReadOnly}
+        />
 
         {(allowedNext.length > 0 || showEscalate) && (
           <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-5">

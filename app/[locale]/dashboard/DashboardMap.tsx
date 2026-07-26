@@ -4,12 +4,19 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import DeckGL from '@deck.gl/react'
 import { GeoJsonLayer } from '@deck.gl/layers'
 import { Map } from 'react-map-gl/maplibre'
+import type { StyleSpecification } from 'maplibre-gl'
 import { useLocale, useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { useReplay } from '@/lib/replay/ReplayContext'
 import { getMapCenter, getReplayMarkerGeoJson } from '@/lib/replay/adapters'
 import ReplayOverlay from '@/lib/replay/ReplayOverlay'
 import { stationMarkerDataUrl, stationLegendSvg } from '@/lib/station-marker'
+import { useDashboardBoot } from '@/components/DashboardBootGate'
+import {
+  getBootDistrictGeo,
+  startDashboardBootstrap,
+  subscribeDashboardBoot,
+} from '@/lib/dashboard-bootstrap'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
 interface LayerToggle {
@@ -23,7 +30,9 @@ const GLOFAS_WMS_LAYER = 'sumAL43EGE'
 
 const LAYER_TOGGLES: LayerToggle[] = [
   { id: 'flood',        labelKey: 'layerFlood',        defaultVisible: true  },
-  { id: 'glofas',       labelKey: 'layerGlofas',       defaultVisible: true  },
+  // Off by default — Copernicus GloFAS OWS is often flaky (502s) and floods
+  // the console with MapLibre AJAXError when left on. Users can still enable it.
+  { id: 'glofas',       labelKey: 'layerGlofas',       defaultVisible: false },
   { id: 'ffd',          labelKey: 'layerFfd',          defaultVisible: true  },
   { id: 'fires',        labelKey: 'layerFires',        defaultVisible: true  },
   { id: 'earthquakes',  labelKey: 'layerEarthquakes',  defaultVisible: true  },
@@ -41,6 +50,22 @@ function stationIconUrl(status: string | null | undefined): string {
   if (status === 'online') return STATION_ICON_ONLINE
   if (status === 'degraded') return STATION_ICON_DEGRADED
   return STATION_ICON_OFFLINE
+}
+
+/** RTL-safe switch — uses logical start/end so the knob mirrors correctly in Urdu. */
+function LayerSwitch({ on, tone = 'emerald' }: { on: boolean; tone?: 'emerald' | 'red' }) {
+  const onColor = tone === 'red' ? 'bg-red-500' : 'bg-emerald-500'
+  return (
+    <span
+      role="switch"
+      aria-checked={on}
+      className={`inline-flex h-5 w-9 shrink-0 items-center rounded-full border-2 border-transparent px-0.5 transition-colors duration-200 ${
+        on ? onColor : 'bg-white/20'
+      } ${on ? 'justify-end' : 'justify-start'}`}
+    >
+      <span className="pointer-events-none block h-4 w-4 rounded-full bg-white shadow" />
+    </span>
+  )
 }
 
 function hazardPointLayer(
@@ -64,6 +89,7 @@ function hazardPointLayer(
 
 export default function DashboardMap() {
   const locale = useLocale()
+  const isRTL = locale === 'ur'
   const t = useTranslations('Dashboard')
   const td = useTranslations('Data')
   const router = useRouter()
@@ -77,6 +103,38 @@ export default function DashboardMap() {
 
   const [highSeverityOnly, setHighSeverityOnly] = useState(false)
 
+  // --- UI-only additions (Tasks 1 & 2): floating Map Layers + Legend panels ---
+  // These only control panel *visibility*. No layer/legend data or logic changes.
+  const [layersOpen, setLayersOpen] = useState(false)
+  const [legendOpen, setLegendOpen] = useState(false)
+  const [layerNotice, setLayerNotice] = useState<string | null>(null)
+  const glofasFailHandled = useRef(false)
+  const layersControlRef = useRef<HTMLDivElement>(null)
+  const legendControlRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handlePointerDown(e: MouseEvent) {
+      if (layersControlRef.current && !layersControlRef.current.contains(e.target as Node)) {
+        setLayersOpen(false)
+      }
+      if (legendControlRef.current && !legendControlRef.current.contains(e.target as Node)) {
+        setLegendOpen(false)
+      }
+    }
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        setLayersOpen(false)
+        setLegendOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handlePointerDown)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [])
+
   const openDistrict = useCallback(
     (districtId: string) => {
       router.push(`/${locale}/dashboard/district/${districtId}`)
@@ -85,14 +143,62 @@ export default function DashboardMap() {
   )
 
   const handleToggle = useCallback((toggleId: string) => {
-    setVisibility((prev) => ({ ...prev, [toggleId]: !prev[toggleId] }))
+    setVisibility((prev) => {
+      const nextOn = !prev[toggleId]
+      // Reset fail latch when the user explicitly re-enables GloFAS
+      if (toggleId === 'glofas' && nextOn) {
+        glofasFailHandled.current = false
+        setLayerNotice(null)
+      }
+      return { ...prev, [toggleId]: nextOn }
+    })
   }, [])
 
-  // Deduplicate district GeoJSON fetch — one fetch, shared by visual + pick layers
-  const [districtGeo, setDistrictGeo] = useState<Record<string, unknown> | null>(null)
+  const disableGlofasAfterFailure = useCallback(() => {
+    if (glofasFailHandled.current) return
+    glofasFailHandled.current = true
+    setVisibility((prev) => (prev.glofas ? { ...prev, glofas: false } : prev))
+    setLayerNotice(t('glofasUnavailable'))
+  }, [t])
+
+  // District GeoJSON comes from the one-shot bootstrap singleton (shared with the
+  // Pakistan map boot gate) so fetches are not restarted on remounts.
+  const [districtGeo, setDistrictGeo] = useState<Record<string, unknown> | null>(
+    () => getBootDistrictGeo()
+  )
+  const { markMapReady } = useDashboardBoot()
+
   useEffect(() => {
-    fetch('/api/districts').then((r) => r.json()).then(setDistrictGeo).catch(() => {})
+    startDashboardBootstrap()
+    return subscribeDashboardBoot(() => {
+      const geo = getBootDistrictGeo()
+      if (geo) setDistrictGeo(geo)
+    })
   }, [])
+
+  const onMapLoad = useCallback(
+    (e: { target: { on: (type: string, listener: (ev: unknown) => void) => void } }) => {
+      const map = e.target
+      map.on('error', (ev: unknown) => {
+        const event = ev as {
+          error?: { status?: number; message?: string; url?: string }
+          sourceId?: string
+        }
+        const err = event.error
+        const haystack = `${err?.message ?? ''} ${err?.url ?? ''} ${event.sourceId ?? ''}`
+        const isGlofas =
+          haystack.includes('glofas') ||
+          haystack.includes('globalfloods') ||
+          event.sourceId === 'glofas-wms'
+        if (isGlofas) {
+          disableGlofasAfterFailure()
+        }
+      })
+
+      markMapReady()
+    },
+    [disableGlofasAfterFailure, markMapReady]
+  )
 
   // Track which layers have been activated at least once to defer initial fetch
   const [activated, setActivated] = useState<Record<string, boolean>>(() => {
@@ -267,6 +373,7 @@ export default function DashboardMap() {
           filled: true,
           getFillColor: (d: { properties: { spi_3?: number } }) => {
             const spi = d.properties.spi_3
+            if (spi === undefined) return [0, 0, 0, 0]
             if (spi <= -2.0) return [139, 0, 0, 100]
             if (spi <= -1.5) return [204, 51, 0, 100]
             if (spi <= -1.0) return [255, 102, 0, 100]
@@ -466,7 +573,15 @@ export default function DashboardMap() {
             return `${properties.title}\n${td('map.severity')}: ${sev}`
           }
           if (properties.hazard_class) {
-            return `${properties.name || td('map.glacialLake')}\n${td('map.class')}: ${properties.hazard_class}`
+            const name = properties.name || td('map.glacialLake')
+            const classLine = `${td('map.class')}: ${properties.hazard_class}`
+            const pop =
+              properties.downstream_population != null
+                ? `\n${td('map.downstreamPopulation')}: ${Number(properties.downstream_population).toLocaleString(
+                    locale === 'ur' ? 'ur-PK' : 'en-GB'
+                  )}`
+                : ''
+            return `${name}\n${classLine}${pop}`
           }
           if (properties.status && (properties.station_id || properties.name)) {
             const st = td.has(`status.${properties.status}`)
@@ -494,111 +609,191 @@ export default function DashboardMap() {
           return null
         }}
       >
-        <Map mapStyle={mapStyle} reuseMaps />
+        <Map
+          mapStyle={mapStyle as unknown as StyleSpecification}
+          reuseMaps
+          onLoad={onMapLoad}
+        />
       </DeckGL>
 
-      <div className="absolute top-6 right-6 z-10 max-h-[calc(100%-3rem)] w-72 overflow-y-auto rounded-2xl border border-white/20 bg-gray-900/80 p-5 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] backdrop-blur-xl">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="font-sans text-sm font-bold uppercase tracking-widest text-white/90">
-           {t('mapLayers')}
-          </h3>
-          <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_8px_2px_rgba(52,211,153,0.6)]" />
+      {layerNotice && (
+        <div className="absolute inset-x-3 top-14 z-30 mx-auto max-w-md rounded-xl border border-amber-200 bg-amber-50/95 px-3 py-2 text-xs text-amber-950 shadow-lg backdrop-blur-sm md:inset-x-auto md:start-6 md:top-6">
+          <div className="flex items-start gap-2">
+            <p className="flex-1 leading-relaxed">{layerNotice}</p>
+            <button
+              type="button"
+              onClick={() => setLayerNotice(null)}
+              className="shrink-0 rounded-md px-1.5 py-0.5 font-semibold text-amber-800/70 hover:bg-amber-100"
+              aria-label={t('dismissNotice')}
+            >
+              ✕
+            </button>
+          </div>
         </div>
+      )}
 
-        {/* High Severity Only toggle */}
-        <div
-          className="mb-3 flex cursor-pointer items-center justify-between rounded-xl border border-red-500/20 bg-red-500/10 p-2.5 transition-colors hover:bg-red-500/20"
-          onClick={() => setHighSeverityOnly((prev) => !prev)}
+      {/* Map Layers control — floating icon button + slide/scale-in panel (Task 1) */}
+      <div ref={layersControlRef} className="absolute top-3 end-3 z-20 sm:top-6 sm:end-6">
+        <button
+          type="button"
+          onClick={() => setLayersOpen((prev) => !prev)}
+          aria-expanded={layersOpen}
+          aria-controls="map-layers-panel"
+          aria-label={layersOpen ? t('closeMapLayers') : t('openMapLayers')}
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-gray-900/85 text-white/90 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] backdrop-blur-xl transition-colors hover:bg-gray-900/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 sm:h-11 sm:w-11"
         >
-          <span className={`text-xs font-semibold whitespace-nowrap transition-colors ${highSeverityOnly ? 'text-red-300' : 'text-white/70'}`}>
-            🚨{t('highestAlertsOnly')}
-          </span>
-          <div
-            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-300 ${highSeverityOnly ? 'bg-red-500' : 'bg-white/20'}`}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <polygon points="12 2 2 7 12 12 22 7 12 2" />
+            <polyline points="2 17 12 22 22 17" />
+            <polyline points="2 12 12 17 22 12" />
+          </svg>
+        </button>
+
+        <div
+          id="map-layers-panel"
+          role="region"
+          aria-label={t('mapLayers')}
+          dir={isRTL ? 'rtl' : 'ltr'}
+          inert={!layersOpen}
+          className={`absolute top-12 end-0 max-h-[min(70vh,28rem)] w-[min(20rem,calc(100vw-1.5rem))] origin-top-end overflow-y-auto rounded-2xl border border-white/20 bg-gray-900/90 p-4 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] backdrop-blur-xl transition-all duration-200 ease-out sm:top-14 sm:p-5 ${
+            layersOpen ? 'translate-y-0 scale-100 opacity-100' : 'pointer-events-none -translate-y-2 scale-95 opacity-0'
+          }`}
+        >
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <h3
+              className={`font-bold text-white/90 ${
+                isRTL
+                  ? 'font-[family-name:var(--font-urdu)] text-sm tracking-normal'
+                  : 'font-sans text-sm uppercase tracking-widest'
+              }`}
+            >
+              {t('mapLayers')}
+            </h3>
+            <div className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_8px_2px_rgba(52,211,153,0.6)]" />
+          </div>
+
+          {/* High Severity Only toggle */}
+          <button
+            type="button"
+            className="mb-3 flex w-full items-center justify-between gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-2.5 text-start transition-colors hover:bg-red-500/20"
+            onClick={() => setHighSeverityOnly((prev) => !prev)}
           >
             <span
-              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow transition duration-300 ease-in-out ${highSeverityOnly ? 'translate-x-4' : 'translate-x-0'}`}
-            />
-          </div>
-        </div>
+              className={`min-w-0 flex-1 font-semibold transition-colors ${
+                isRTL
+                  ? 'font-[family-name:var(--font-urdu)] text-[13px] leading-7'
+                  : 'text-xs leading-4'
+              } ${highSeverityOnly ? 'text-red-300' : 'text-white/70'}`}
+            >
+              {t('highestAlertsOnly')}
+            </span>
+            <LayerSwitch on={highSeverityOnly} tone="red" />
+          </button>
 
-        <ul className="space-y-2">
-          {LAYER_TOGGLES.map((toggle) => {
-            const isActive = visibility[toggle.id]
-            return (
-              <li
-                key={toggle.id}
-                className="group flex cursor-pointer items-center justify-between rounded-xl p-2 transition-colors duration-200 hover:bg-white/5"
-                onClick={() => handleToggle(toggle.id)}
-              >
-                 <span
-                  className={`text-xs font-medium transition-colors duration-200 ${isActive ? 'text-white' : 'text-white/60 group-hover:text-white/80'}`}
-                >
-                  {t(toggle.labelKey)}
-                </span>
-                <div
-                  className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-300 ${isActive ? 'bg-emerald-500' : 'bg-white/20'}`}
-                >
-                  <span
-                    className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow transition duration-300 ease-in-out ${isActive ? 'translate-x-4' : 'translate-x-0'}`}
-                  />
-                </div>
-              </li>
-            )
-          })}
-        </ul>
+          <ul className="space-y-1">
+            {LAYER_TOGGLES.map((toggle) => {
+              const isActive = visibility[toggle.id]
+              return (
+                <li key={toggle.id}>
+                  <button
+                    type="button"
+                    className="group flex w-full cursor-pointer items-center justify-between gap-3 rounded-xl p-2.5 text-start transition-colors duration-200 hover:bg-white/5"
+                    onClick={() => handleToggle(toggle.id)}
+                  >
+                    <span
+                      className={`min-w-0 flex-1 font-medium transition-colors duration-200 ${
+                        isRTL
+                          ? 'font-[family-name:var(--font-urdu)] text-[13px] leading-7'
+                          : 'text-xs leading-4'
+                      } ${isActive ? 'text-white' : 'text-white/60 group-hover:text-white/80'}`}
+                    >
+                      {t(toggle.labelKey as 'layerFlood')}
+                    </span>
+                    <LayerSwitch on={isActive} />
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
+        </div>
       </div>
 
-      {/* Map Legend */}
-      <div className="absolute bottom-6 left-6 z-10 rounded-xl border border-white/20 bg-gray-900/80 px-4 py-3 backdrop-blur-xl">
-        <h4 className="mb-2 text-[10px] font-bold uppercase tracking-widest text-white/70">{t('legend')}</h4>
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-2">
-            <svg width="12" height="12"><circle cx="6" cy="6" r="5" fill="#D97757" stroke="white" strokeWidth="1"/></svg>
-            <span className="text-[11px] text-white/80">{t('hazardEvent')}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span
-              className="inline-flex"
-              dangerouslySetInnerHTML={{ __html: stationLegendSvg('online') }}
-            />
-            <span className="text-[11px] text-white/80">{t('fieldStation')}</span>
-          </div>
-          {visibility.stations && (
-            <div className="ms-4 space-y-1 border-s border-white/10 ps-2">
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-[#0F6B3D]" />
-                <span className="text-[10px] text-white/70">Online</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-[#E0A030]" />
-                <span className="text-[10px] text-white/70">Degraded</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-[#B3261E]" />
-                <span className="text-[10px] text-white/70">Offline</span>
-              </div>
+      {/* Map Legend control — compact floating button that expands upward (Task 2) */}
+      {/* Cleared above the mobile hazard peek (h-12) + bottom nav; desktop keeps original offset */}
+      <div ref={legendControlRef} className="absolute bottom-16 start-3 z-20 sm:bottom-6 sm:start-6">
+        <div
+          id="map-legend-panel"
+          role="region"
+          aria-label={t('legend')}
+          dir={isRTL ? 'rtl' : 'ltr'}
+          inert={!legendOpen}
+          className={`absolute bottom-12 start-0 w-52 origin-bottom-start rounded-xl border border-white/20 bg-gray-900/90 px-3.5 py-3 leading-tight shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] backdrop-blur-xl transition-all duration-200 ease-out sm:bottom-14 sm:w-56 sm:px-4 ${
+            legendOpen ? 'translate-y-0 scale-100 opacity-100' : 'pointer-events-none translate-y-2 scale-95 opacity-0'
+          }`}
+        >
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2">
+              <svg width="12" height="12" className="shrink-0"><circle cx="6" cy="6" r="5" fill="#D97757" stroke="white" strokeWidth="1"/></svg>
+              <span className={`text-[11px] leading-tight text-white/80 ${isRTL ? 'font-[family-name:var(--font-urdu)] leading-6' : ''}`}>{t('hazardEvent')}</span>
             </div>
-          )}
-          {visibility.glofas && (
-            <>
-              <div className="my-1 border-t border-white/10" />
-              <p className="text-[9px] font-semibold uppercase tracking-wide text-white/50">{t('glofasHeading')} (1–30d)</p>
-              <div className="flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-sm bg-yellow-400" />
-                <span className="text-[11px] text-white/80">{t('glofas2yr')}</span>
+            <div className="flex items-center gap-2">
+              <span
+                className="inline-flex shrink-0"
+                dangerouslySetInnerHTML={{ __html: stationLegendSvg('online') }}
+              />
+              <span className={`text-[11px] leading-tight text-white/80 ${isRTL ? 'font-[family-name:var(--font-urdu)] leading-6' : ''}`}>{t('fieldStation')}</span>
+            </div>
+            {visibility.stations && (
+              <div className="ms-4 space-y-1 border-s border-white/10 ps-2">
+                <div className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-[#0F6B3D]" />
+                  <span className="text-[10px] leading-tight text-white/70">Online</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-[#E0A030]" />
+                  <span className="text-[10px] leading-tight text-white/70">Degraded</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-[#B3261E]" />
+                  <span className="text-[10px] leading-tight text-white/70">Offline</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-sm bg-red-500" />
-                <span className="text-[11px] text-white/80">{t('glofas5yr')}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-sm bg-purple-600" />
-                <span className="text-[11px] text-white/80">{t('glofas20yr')}</span>
-              </div>
-            </>
-          )}
+            )}
+            {visibility.glofas && (
+              <>
+                <div className="my-1 border-t border-white/10" />
+                <p className="text-[9px] font-semibold uppercase leading-tight tracking-wide text-white/50">{t('glofasHeading')} (1–30d)</p>
+                <div className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 rounded-sm bg-yellow-400" />
+                  <span className="text-[11px] leading-tight text-white/80">{t('glofas2yr')}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 rounded-sm bg-red-500" />
+                  <span className="text-[11px] leading-tight text-white/80">{t('glofas5yr')}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 rounded-sm bg-purple-600" />
+                  <span className="text-[11px] leading-tight text-white/80">{t('glofas20yr')}</span>
+                </div>
+              </>
+            )}
+          </div>
         </div>
+
+        <button
+          type="button"
+          onClick={() => setLegendOpen((prev) => !prev)}
+          aria-expanded={legendOpen}
+          aria-controls="map-legend-panel"
+          aria-label={legendOpen ? t('closeLegend') : t('openLegend')}
+          className="flex items-center gap-2 rounded-full border border-white/20 bg-gray-900/85 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-white/90 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] backdrop-blur-xl transition-colors hover:bg-gray-900/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 sm:px-4 sm:text-[11px]"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M4 4h16v4H4z" />
+            <path d="M4 12h10M4 18h7" />
+          </svg>
+          {t('legend')}
+        </button>
       </div>
 
       {isReplaying && <ReplayOverlay />}

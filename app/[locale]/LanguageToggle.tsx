@@ -24,13 +24,9 @@ export default function LanguageToggle({
     router.push(segments.join('/') || `/${locale}`)
   }
 
-  // Pages that already show a header toggle — skip the floating FAB.
-  if (
-    variant === 'floating' &&
-    (/\/(en|ur)\/dashboard\/?$/.test(pathname) || /\/(en|ur)\/login/.test(pathname))
-  ) {
-    return null
-  }
+  // Pages render this component explicitly (variant="header" in a page's own
+  // header, or variant="floating" for a page with no header chrome). There is
+  // no longer an automatic app-wide instance, so no route-detection is needed here.
 
   const shell =
     variant === 'floating'
@@ -55,13 +51,13 @@ export default function LanguageToggle({
     <div
       role="group"
       aria-label={t('switchLanguage')}
-      className={`${shell} ${palette} inline-flex overflow-hidden rounded-full p-0.5 text-sm font-medium`}
+      className={`${shell} ${palette} inline-flex overflow-hidden rounded-full p-0.5 text-xs font-medium sm:text-sm`}
     >
       <button
         type="button"
         onClick={() => switchTo('en')}
         aria-pressed={currentLocale === 'en'}
-        className={`rounded-full px-3 py-1.5 transition-colors ${
+        className={`rounded-full px-2.5 py-1 transition-colors sm:px-3 sm:py-1.5 ${
           currentLocale === 'en' ? active : idle
         }`}
       >
@@ -71,7 +67,7 @@ export default function LanguageToggle({
         type="button"
         onClick={() => switchTo('ur')}
         aria-pressed={currentLocale === 'ur'}
-        className={`rounded-full px-3 py-1.5 font-[family-name:var(--font-urdu)] transition-colors ${
+        className={`rounded-full px-2.5 py-1 font-[family-name:var(--font-urdu)] transition-colors sm:px-3 sm:py-1.5 ${
           currentLocale === 'ur' ? active : idle
         }`}
       >

@@ -25,7 +25,7 @@ export default function ReplayOverlay() {
   const phase = currentFrame?.phase ?? 'baseline'
 
   return (
-    <div className="pointer-events-auto absolute bottom-6 left-6 right-6 z-20 mx-auto max-w-3xl rounded-xl border border-white/20 bg-[var(--color-primary)]/95 p-4 text-white shadow-2xl backdrop-blur-md">
+    <div className="pointer-events-auto absolute bottom-16 left-3 right-3 z-20 mx-auto max-w-3xl rounded-xl border border-white/20 bg-[var(--color-primary)]/95 p-3 text-white shadow-2xl backdrop-blur-md sm:bottom-6 sm:left-6 sm:right-6 sm:p-4">
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
         <span
           className="rounded-full px-2.5 py-0.5 text-xs font-bold uppercase"

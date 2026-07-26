@@ -37,6 +37,10 @@ npm run mqtt:bridge
 # Publish JSON to: nigheban/stations/{station_id}/telemetry
 ```
 
+## Cron & station simulation (production)
+
+See **[docs/CRON.md](docs/CRON.md)** for Vercel + GitHub Actions setup. Stations go **offline after 30 minutes** without new readings — keep the **Simulate Station Telemetry** Action running every 10 minutes with secrets `CRON_SECRET` and `APP_URL`.
+
 ## Branch model
 
 `feature/* → staging → main`. See project handbook for full workflow.

@@ -3,7 +3,6 @@ import { Inter, IBM_Plex_Mono, Noto_Nastaliq_Urdu } from "next/font/google";
 import "../globals.css";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
-import LanguageToggle from './LanguageToggle';
 
 const inter = Inter({
   variable: "--font-sans",
@@ -27,6 +26,13 @@ export const metadata: Metadata = {
   description: "Provincial multi-hazard monitoring and alert system for KP & GB",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#01411C",
+};
+
 export default async function RootLayout({
   children,
   params
@@ -47,7 +53,6 @@ export default async function RootLayout({
       >
         <NextIntlClientProvider messages={messages}>
           {children}
-          <LanguageToggle currentLocale={locale} />
         </NextIntlClientProvider>
       </body>
     </html>

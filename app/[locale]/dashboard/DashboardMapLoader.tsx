@@ -11,11 +11,8 @@ import dynamic from 'next/dynamic'
 // bundle streams in behind it.
 const DashboardMap = dynamic(() => import('./DashboardMap'), {
   ssr: false,
-  loading: () => (
-    <div className="flex h-full w-full items-center justify-center bg-[var(--color-surface)] text-sm text-[var(--color-ink)]/50">
-      Loading hazard map…
-    </div>
-  ),
+  // Boot gate covers first paint; keep map slot empty (no second map animation)
+  loading: () => <div className="h-full w-full bg-[var(--color-base)]" />,
 })
 
 export default DashboardMap

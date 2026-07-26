@@ -70,7 +70,7 @@ export const PROVINCE_UR: Record<string, string> = {
 }
 
 type TranslateFn = {
-  (key: string): string
+  (key: string, values?: Record<string, string | number>): string
   has?: (key: string) => boolean
 }
 
@@ -202,10 +202,9 @@ export function workflowLabel(
   if (from === 'pending_approval' && to === 'draft') return t('workflow.returnToDraft')
   if (to === 'dismissed') return t('workflow.dismiss')
   if (to === 'cancelled') return t('workflow.cancel')
+  if (to === 'expired') return t('workflow.markExpired')
   try {
-    return t('workflow.transition')
-      .replace('{from}', from)
-      .replace('{to}', to)
+    return t('workflow.transition', { from, to })
   } catch {
     return `${from} → ${to}`
   }

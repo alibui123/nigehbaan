@@ -8,7 +8,9 @@
     "backToOverview": "← Provincial Overview",
     "switchLanguage": "Switch language",
     "english": "EN",
-    "urdu": "اردو"
+    "urdu": "اردو",
+    "loading": "Loading…",
+    "loadingMap": "Loading map & boundaries…"
   },
   "Login": {
     "tagline": "Multi-Hazard Early Warning Platform",
@@ -59,7 +61,29 @@
     "layerGlacial": "Glacial Lakes",
     "layerStations": "Field Stations",
     "layerSnow": "NASA Snow Cover",
-    "openNav": "Open navigation menu"
+    "openNav": "Open navigation menu",
+    "openMapLayers": "Open map layers",
+    "closeMapLayers": "Close map layers",
+    "openLegend": "Open legend",
+    "closeLegend": "Close legend",
+    "collapseSidebar": "Collapse sidebar",
+    "expandSidebar": "Expand sidebar",
+    "navMap": "Map",
+    "navStations": "Stations",
+    "navMore": "More",
+    "navMenu": "Menu",
+    "closeNav": "Close menu",
+    "dataFeeds": "Feeds",
+    "sheetOpen": "Open",
+    "sheetClose": "Close",
+    "kpiShortWarnings": "Warn",
+    "kpiShortDistricts": "Dist",
+    "kpiShortPopulation": "Pop",
+    "kpiShortDelivery": "Deliv",
+    "liveStatus": "Live status",
+    "liveOk": "Clear",
+    "glofasUnavailable": "GloFAS flood overlay is temporarily unavailable (upstream 502). Turn it back on from Layers when the service recovers.",
+    "dismissNotice": "Dismiss"
   },
   "Alerts": {
     "candidateReview": "Alert Candidate Review",
@@ -168,6 +192,7 @@
       "returnToDraft": "Return to draft",
       "dismiss": "Dismiss",
       "cancel": "Cancel alert",
+      "markExpired": "Mark expired",
       "transition": "{from} → {to}"
     },
     "map": {
@@ -178,6 +203,7 @@
       "rate": "Rate",
       "class": "Class",
       "glacialLake": "Glacial Lake",
+      "downstreamPopulation": "Downstream pop.",
       "station": "Station",
       "openDistrict": "Click to open district console",
       "cusecs": "cusecs"

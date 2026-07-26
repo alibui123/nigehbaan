@@ -1,12 +1,12 @@
 'use client'
 
-import Link from 'next/link'
 import { useLocale, useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { useReplay } from '@/lib/replay/ReplayContext'
 import { formatReplayDuration } from '@/lib/replay/adapters'
 import { phaseLabel, phaseColor } from '@/lib/replay/labels'
 import { isFloodFrame, isGlofFrame } from '@/lib/replay/types'
+import PageHeader from '../PageHeader'
 
 export default function ReplayPage() {
   const locale = useLocale()
@@ -38,20 +38,17 @@ export default function ReplayPage() {
 
   if (!isReplaying || !scenario) {
     return (
-      <div className="min-h-screen bg-[var(--color-base)]">
-        <header className="border-b border-[var(--color-border)] bg-[var(--color-primary)] px-6 py-4">
-          <Link href={`/${locale}/dashboard`} className="text-sm text-white/70 hover:text-white">
-            {tc('backToOverview')}
-          </Link>
-          <h1 className="mt-2 text-lg font-semibold text-white">{t('title')}</h1>
-          <p className="text-sm text-white/70">
-            {t('subtitle')}
-          </p>
-        </header>
+      <div className="min-h-dvh bg-[var(--color-base)]">
+        <PageHeader
+          locale={locale}
+          title={t('title')}
+          subtitle={t('subtitle')}
+          backLabel={tc('backToOverview')}
+        />
 
-        <div className="mx-auto max-w-2xl space-y-4 p-6">
+        <div className="dashboard-page-body mx-auto max-w-2xl space-y-3 px-3 pt-4 sm:space-y-4 sm:px-6 sm:pt-6">
           {scenarios.length === 0 && (
-            <p className="rounded-lg border border-dashed border-[var(--color-border)] p-6 text-sm text-[var(--color-ink)]/50">
+            <p className="rounded-2xl border border-dashed border-[var(--color-border)] p-6 text-sm text-[var(--color-ink)]/50">
               {scenariosLoadError ? (
                 <>Could not load scenarios: {scenariosLoadError}</>
               ) : (
@@ -67,30 +64,26 @@ export default function ReplayPage() {
           {scenarios.map((s) => (
             <div
               key={s.id}
-              className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm"
+              className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm sm:p-5"
             >
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h2 className="font-semibold text-[var(--color-ink)]">{s.name}</h2>
-                  <p className="mt-1 text-sm text-[var(--color-ink)]/70">{s.description}</p>
-                  <p className="mt-2 font-mono text-xs text-[var(--color-ink)]/40">
-                    {s.district} · {s.hazard_type} · {formatReplayDuration(s.duration_seconds)} real time ·{' '}
-                    {s.default_speed_multiplier}× default
-                  </p>
-                </div>
-              </div>
-              <div className="mt-4 flex flex-wrap gap-2">
+              <h2 className="font-semibold text-[var(--color-ink)]">{s.name}</h2>
+              <p className="mt-1 text-sm text-[var(--color-ink)]/70">{s.description}</p>
+              <p className="mt-2 font-mono text-xs text-[var(--color-ink)]/40">
+                {s.district} · {s.hazard_type} · {formatReplayDuration(s.duration_seconds)} real time ·{' '}
+                {s.default_speed_multiplier}× default
+              </p>
+              <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                 <button
                   type="button"
                   onClick={() => loadScenario(s.slug)}
-                  className="rounded-md border border-[var(--color-border)] px-4 py-2 text-sm hover:bg-white"
+                  className="tap-target rounded-xl border border-[var(--color-border)] px-4 py-2.5 text-sm active:bg-[var(--color-base)]"
                 >
                   Open here
                 </button>
                 <button
                   type="button"
                   onClick={() => launchOnOverview(s.slug)}
-                  className="rounded-md bg-[var(--color-primary)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--color-primary-hover)]"
+                  className="tap-target rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white active:bg-[var(--color-primary-hover)]"
                 >
                   Launch on Overview →
                 </button>
@@ -107,24 +100,25 @@ export default function ReplayPage() {
   const data = currentFrame?.frame_data
 
   return (
-    <div className="min-h-screen bg-[var(--color-base)]">
-      <header className="flex items-center gap-4 border-b border-[var(--color-border)] bg-[var(--color-primary)] px-6 py-4">
-        <Link href={`/${locale}/dashboard`} className="text-sm text-white/70 hover:text-white">
-          ← Overview
-        </Link>
-        <h1 className="text-lg font-semibold text-white">{scenario.name}</h1>
-        <button
-          type="button"
-          onClick={exitReplay}
-          className="ml-auto rounded border border-white/30 px-3 py-1 text-sm text-white hover:bg-white/10"
-        >
-          Exit Replay
-        </button>
-      </header>
+    <div className="min-h-dvh bg-[var(--color-base)]">
+      <PageHeader
+        locale={locale}
+        title={scenario.name}
+        backLabel="← Overview"
+        trailing={
+          <button
+            type="button"
+            onClick={exitReplay}
+            className="rounded-lg border border-white/30 px-3 py-1.5 text-xs text-white active:bg-white/10 sm:text-sm"
+          >
+            Exit Replay
+          </button>
+        }
+      />
 
-      <div className="mx-auto max-w-3xl space-y-6 p-6">
+      <div className="dashboard-page-body mx-auto max-w-3xl space-y-4 px-3 pt-4 sm:space-y-6 sm:px-6 sm:pt-6">
         <div
-          className="rounded-lg border bg-[var(--color-surface)] p-5"
+          className="rounded-2xl border bg-[var(--color-surface)] p-4 sm:p-5"
           style={{ borderColor: `${phaseColor(phase)}44` }}
         >
           <span
@@ -156,14 +150,14 @@ export default function ReplayPage() {
           <button
             type="button"
             onClick={isPlaying ? pause : play}
-            className="rounded-md bg-[var(--color-primary)] px-5 py-2 text-sm font-semibold text-white"
+            className="tap-target rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-sm font-semibold text-white"
           >
             {isPlaying ? 'Pause' : 'Play'}
           </button>
           <select
             value={speedMultiplier}
             onChange={(e) => setSpeedMultiplier(Number(e.target.value))}
-            className="rounded border border-[var(--color-border)] px-3 py-2 text-sm"
+            className="rounded-xl border border-[var(--color-border)] px-3 py-2.5 text-sm"
           >
             <option value={60}>60×</option>
             <option value={120}>120×</option>
@@ -174,16 +168,16 @@ export default function ReplayPage() {
           <button
             type="button"
             onClick={() => router.push(`/${locale}/dashboard`)}
-            className="ml-auto text-sm text-[var(--color-primary)] underline"
+            className="w-full text-sm text-[var(--color-primary)] underline sm:ml-auto sm:w-auto"
           >
             View on map →
           </button>
         </div>
 
         {data && (
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-3 sm:gap-4 md:grid-cols-2">
             {isGlofFrame(data) && (
-              <div className="rounded-lg border border-[var(--color-border)] bg-white p-4">
+              <div className="rounded-2xl border border-[var(--color-border)] bg-white p-4">
                 <h2 className="mb-2 text-xs font-bold uppercase text-[var(--color-ink)]/50">GLOF Station</h2>
                 <dl className="space-y-1 text-sm">
                   <div>Water level: <strong>{data.station.water_level_m} m</strong></div>
@@ -193,7 +187,7 @@ export default function ReplayPage() {
               </div>
             )}
             {isFloodFrame(data) && (
-              <div className="rounded-lg border border-[var(--color-border)] bg-white p-4">
+              <div className="rounded-2xl border border-[var(--color-border)] bg-white p-4">
                 <h2 className="mb-2 text-xs font-bold uppercase text-[var(--color-ink)]/50">River Gauge</h2>
                 <dl className="space-y-1 text-sm">
                   <div>{data.gauge.name}</div>
@@ -203,7 +197,7 @@ export default function ReplayPage() {
                 </dl>
               </div>
             )}
-            <div className="rounded-lg border border-[var(--color-border)] bg-white p-4">
+            <div className="rounded-2xl border border-[var(--color-border)] bg-white p-4">
               <h2 className="mb-2 text-xs font-bold uppercase text-[var(--color-ink)]/50">Alert</h2>
               {data.alert ? (
                 <dl className="space-y-1 text-sm">
@@ -215,9 +209,9 @@ export default function ReplayPage() {
                 <p className="text-sm text-[var(--color-ink)]/40">No alert yet.</p>
               )}
             </div>
-            <div className="rounded-lg border border-[var(--color-border)] bg-white p-4 md:col-span-2">
+            <div className="rounded-2xl border border-[var(--color-border)] bg-white p-4 md:col-span-2">
               <h2 className="mb-2 text-xs font-bold uppercase text-[var(--color-ink)]/50">Dissemination</h2>
-              <div className="flex flex-wrap gap-6 text-sm font-mono">
+              <div className="grid grid-cols-2 gap-3 text-sm font-mono sm:flex sm:flex-wrap sm:gap-6">
                 <span>Sent: {data.dissemination.sent}</span>
                 <span>Delivered: {data.dissemination.delivered}</span>
                 <span>Failed: {data.dissemination.failed}</span>

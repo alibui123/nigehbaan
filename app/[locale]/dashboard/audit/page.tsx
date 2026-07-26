@@ -1,9 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import { buildAuditQuery, ACTION_LABELS } from '@/lib/audit'
 import AuditLogTable from './AuditLogTable'
+import PageHeader from '../PageHeader'
 
 export const dynamic = 'force-dynamic'
 
@@ -59,20 +59,21 @@ export default async function AuditLogPage({
   }
 
   return (
-    <div className="flex h-screen flex-col bg-[var(--color-base)]">
-      <header className="flex items-center gap-4 border-b border-[var(--color-border)] bg-[var(--color-primary)] px-6 py-4">
-        <Link href={`/${locale}/dashboard`} className="text-sm text-white/70 hover:text-white">
-          {tc('backToOverview')}
-        </Link>
-        <h1 className="text-lg font-semibold text-white">{t('title')}</h1>
-        {count != null && (
-          <span className="ms-auto rounded-full bg-white/10 px-3 py-1 font-mono text-xs text-white">
-            {t('entries', { count: count.toLocaleString() })}
-          </span>
-        )}
-      </header>
+    <div className="flex min-h-dvh flex-col bg-[var(--color-base)]">
+      <PageHeader
+        locale={locale}
+        title={t('title')}
+        backLabel={tc('backToOverview')}
+        trailing={
+          count != null ? (
+            <span className="rounded-full bg-white/10 px-2.5 py-1 font-mono text-[10px] text-white sm:text-xs">
+              {t('entries', { count: count.toLocaleString() })}
+            </span>
+          ) : undefined
+        }
+      />
 
-      <div className="flex-1 overflow-auto p-6">
+      <div className="dashboard-page-body flex-1 overflow-auto px-3 pt-4 sm:px-6 sm:pt-6">
         <div className="mx-auto max-w-6xl">
           <AuditLogTable
             locale={locale}

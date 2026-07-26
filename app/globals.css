@@ -1,13 +1,15 @@
 @import "tailwindcss";
 
 @theme {
-  --color-base: #FAFAF8;
+  --color-base: #F4F6F3;
   --color-surface: #FFFFFF;
   --color-ink: #14231A;
   --color-primary: #01411C;
   --color-primary-hover: #0F6B3D;
-  --color-border: #E4E4DF;
+  --color-border: #DCE3DC;
   --color-emergency: #B3261E;
+  --color-warn: #C47A12;
+  --color-ok: #0F6B3D;
 
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
@@ -18,9 +20,29 @@ body {
   background-color: var(--color-base);
   color: var(--color-ink);
   font-family: var(--font-sans);
+  -webkit-tap-highlight-color: transparent;
 }
 
 html[lang="ur"] body {
   font-family: var(--font-urdu), var(--font-sans);
   line-height: 1.8;
+}
+
+/* Shared mobile bottom-nav clearance used by dashboard list pages */
+.dashboard-page-body {
+  padding-bottom: calc(3.5rem + env(safe-area-inset-bottom, 0px) + 1rem);
+}
+
+@media (min-width: 768px) {
+  .dashboard-page-body {
+    padding-bottom: 1.5rem;
+  }
+}
+
+/* Prefer comfortable tap targets on touch devices without bloating desktop */
+@media (pointer: coarse) {
+  .tap-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }
