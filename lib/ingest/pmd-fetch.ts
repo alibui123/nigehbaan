@@ -1,5 +1,5 @@
 import * as cheerio from 'cheerio'
-import pdfParse from 'pdf-parse'
+import pdfParse from 'pdf-parse/lib/pdf-parse.js'
 import { BROWSER_UA } from '@/lib/ingest/status'
 import { normalizeFloodLevel } from '@/lib/pmd/rivers'
 
@@ -104,7 +104,6 @@ export function parseBulletinText(text: string) {
     const flowMatch = line.match(/([\d,]+)\s*cusecs/i)
     if (!flowMatch && !levelMatch) continue
 
-    // "Indus at Tarbela 245000 cusecs Low Flood"
     const atMatch = line.match(/([A-Za-z]+)\s+at\s+([A-Za-z\s]+?)(?:\s+\d|\s+Low|\s+Medium|\s+High|$)/i)
     if (atMatch) {
       rivers.push({
@@ -127,7 +126,6 @@ export function parseBulletinText(text: string) {
     }
   }
 
-  // Fallback regex if line-based parse found nothing
   if (rivers.length === 0) {
     const riverRowRegex =
       /([A-Z][a-zA-Z\s]{2,30}?)\s+(?:at\s+([A-Za-z\s]+))?[:\-]?\s*([\d,]+)\s*cusecs/gi
@@ -179,7 +177,6 @@ export function parseRiverStateStations(html: string): PmdRiverReading[] {
   let m: RegExpExecArray | null
   while ((m = re.exec(html)) !== null) {
     const block = m[0]
-    // Skip oversized blobs (polygon / geometry objects)
     if (block.length > 2500) continue
     if (!/discharge\s*:/.test(block)) continue
 
@@ -240,6 +237,13 @@ export function parseRiverFlowsTable(html: string): PmdRiverReading[] {
   return dedupeRivers(rivers)
 }
 
+/** Parse already-fetched river-state / flows HTML (no network). */
+export function parseRiverFlowsHtml(html: string): PmdRiverReading[] {
+  const fromStations = parseRiverStateStations(html)
+  if (fromStations.length > 0) return fromStations
+  return parseRiverFlowsTable(html)
+}
+
 /** Scrape live river gauge page (S3 MVP). Prefers /river-state JS gauges; falls back to HTML tables. */
 export async function fetchPmdRiverFlowsComparison(): Promise<PmdRiverReading[]> {
   const res = await fetch(PMD_RIVER_FLOWS_URL, {
@@ -249,10 +253,7 @@ export async function fetchPmdRiverFlowsComparison(): Promise<PmdRiverReading[]>
   if (!res.ok) return []
 
   const html = await res.text()
-  const fromStations = parseRiverStateStations(html)
-  if (fromStations.length > 0) return fromStations
-
-  return parseRiverFlowsTable(html)
+  return parseRiverFlowsHtml(html)
 }
 
 export function dedupeRivers(rivers: PmdRiverReading[]): PmdRiverReading[] {
@@ -307,20 +308,154 @@ export function legacyJsonToRivers(raw: unknown): PmdRiverReading[] {
   }))
 }
 
-/** Full S3 ingest: daily bulletin PDF + river-flows comparison page. */
-export async function fetchPmdFfdSnapshot(): Promise<PmdBulletin & { pdfBuffer: Buffer }> {
-  const [htmlRivers, bulletin] = await Promise.all([
-    fetchPmdRiverFlowsComparison(),
-    fetchPmdBulletin(),
-  ])
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms)
+    promise.then(
+      (value) => {
+        clearTimeout(timer)
+        resolve(value)
+      },
+      (err) => {
+        clearTimeout(timer)
+        reject(err)
+      }
+    )
+  })
+}
 
-  const merged = mergeRiverSources(htmlRivers, bulletin.rivers)
+/** Download + parse bulletin PDF from an already-fetched listing page. */
+export async function fetchPmdBulletinFromListing(
+  listingHtml: string,
+  options?: { pdfTimeoutMs?: number }
+): Promise<PmdBulletin & { pdfBuffer: Buffer }> {
+  const bulletin = findTodaysBulletin(listingHtml)
+  const pdfUrl = resolveUrl(bulletin.href)
+  const pdfTimeoutMs = options?.pdfTimeoutMs ?? 20_000
+
+  const pdfRes = await withTimeout(
+    fetch(pdfUrl, {
+      headers: { 'User-Agent': BROWSER_UA },
+      cache: 'no-store',
+    }),
+    pdfTimeoutMs,
+    'Bulletin PDF fetch'
+  )
+  if (!pdfRes.ok) {
+    throw new Error(`Bulletin PDF fetch failed (id ${bulletin.id}): HTTP ${pdfRes.status}`)
+  }
+
+  const pdfBuffer = Buffer.from(await pdfRes.arrayBuffer())
+  const { text } = await withTimeout(pdfParse(pdfBuffer), 15_000, 'Bulletin PDF parse')
+  const parsed = parseBulletinText(text)
 
   return {
-    ...bulletin,
-    rivers: merged,
-    forecast_text: bulletin.forecast_text,
+    bulletin_id: bulletin.id,
+    matched_by_date: bulletin.matchedByDate,
+    warning_level: parsed.warningLevel,
+    forecast_text: parsed.forecastText,
+    rivers: parsed.rivers,
+    fetched_at: new Date().toISOString(),
+    source_url: pdfUrl,
+    pdfBuffer,
   }
+}
+
+/**
+ * Build snapshot from already-fetched HTML. PDF is best-effort — river-state
+ * gauges alone are enough to keep the feed healthy on a tight serverless budget.
+ */
+export async function buildPmdSnapshotFromHtml(params: {
+  listingHtml: string | null
+  riverHtml: string | null
+  pdfTimeoutMs?: number
+}): Promise<PmdBulletin & { pdfBuffer: Buffer | null; pdfError: string | null }> {
+  const htmlRivers = params.riverHtml ? parseRiverFlowsHtml(params.riverHtml) : []
+
+  let link: BulletinLink | null = null
+  let listingError: string | null = null
+  if (params.listingHtml) {
+    try {
+      link = findTodaysBulletin(params.listingHtml)
+    } catch (err) {
+      listingError = err instanceof Error ? err.message : String(err)
+    }
+  } else {
+    listingError = 'Listing page unavailable'
+  }
+
+  let bulletin: (PmdBulletin & { pdfBuffer: Buffer }) | null = null
+  let pdfError: string | null = listingError
+
+  if (link) {
+    try {
+      bulletin = await fetchPmdBulletinFromListing(params.listingHtml!, {
+        pdfTimeoutMs: params.pdfTimeoutMs,
+      })
+      pdfError = null
+    } catch (err) {
+      pdfError = err instanceof Error ? err.message : String(err)
+    }
+  }
+
+  const merged = mergeRiverSources(htmlRivers, bulletin?.rivers ?? [])
+
+  if (merged.length === 0 && !bulletin?.forecast_text?.trim()) {
+    throw new Error(
+      pdfError
+        ? `PMD ingest failed — no river gauges and PDF error: ${pdfError}`
+        : 'PMD ingest failed — no river gauges and no bulletin text'
+    )
+  }
+
+  if (bulletin) {
+    return {
+      ...bulletin,
+      rivers: merged,
+      forecast_text:
+        bulletin.forecast_text.trim() ||
+        `PMD FFD bulletin #${bulletin.bulletin_id} (PDF text thin; ${merged.length} gauges from river-state).`,
+      pdfError,
+    }
+  }
+
+  // River-state-only fallback — reuse real bulletin id when listing parsed.
+  const bulletinId =
+    link?.id ??
+    Number(
+      `${new Date().getUTCFullYear()}${String(new Date().getUTCMonth() + 1).padStart(2, '0')}${String(new Date().getUTCDate()).padStart(2, '0')}`
+    )
+
+  return {
+    bulletin_id: bulletinId,
+    matched_by_date: link?.matchedByDate ?? false,
+    warning_level: null,
+    forecast_text: `PMD FFD river-state snapshot (${merged.length} gauges). Bulletin PDF unavailable: ${pdfError ?? 'unknown'}`,
+    rivers: merged,
+    fetched_at: new Date().toISOString(),
+    source_url: link ? resolveUrl(link.href) : PMD_RIVER_FLOWS_URL,
+    pdfBuffer: null,
+    pdfError,
+  }
+}
+
+/** Full S3 ingest: daily bulletin PDF + river-flows page (used by map live fallback). */
+export async function fetchPmdFfdSnapshot(): Promise<PmdBulletin & { pdfBuffer: Buffer | null }> {
+  const [listingRes, flowsRes] = await Promise.all([
+    fetch(PMD_LISTING_URL, {
+      headers: { 'User-Agent': BROWSER_UA },
+      cache: 'no-store',
+    }),
+    fetch(PMD_RIVER_FLOWS_URL, {
+      headers: { 'User-Agent': BROWSER_UA, Accept: 'text/html' },
+      cache: 'no-store',
+    }),
+  ])
+
+  const listingHtml = listingRes.ok ? await listingRes.text() : null
+  const riverHtml = flowsRes.ok ? await flowsRes.text() : null
+  const snap = await buildPmdSnapshotFromHtml({ listingHtml, riverHtml })
+  return snap
 }
 
 /** Fetch and parse the latest PMD FFD flood bulletin PDF. */
@@ -333,34 +468,13 @@ export async function fetchPmdBulletin(): Promise<PmdBulletin & { pdfBuffer: Buf
     throw new Error(`Listing page fetch failed: HTTP ${listingRes.status}`)
   }
   const listingHtml = await listingRes.text()
-  const bulletin = findTodaysBulletin(listingHtml)
-  const pdfUrl = resolveUrl(bulletin.href)
+  const bulletin = await fetchPmdBulletinFromListing(listingHtml)
 
-  const pdfRes = await fetch(pdfUrl, {
-    headers: { 'User-Agent': BROWSER_UA },
-    cache: 'no-store',
-  })
-  if (!pdfRes.ok) {
-    throw new Error(`Bulletin PDF fetch failed (id ${bulletin.id}): HTTP ${pdfRes.status}`)
-  }
-  const pdfBuffer = Buffer.from(await pdfRes.arrayBuffer())
-  const { text } = await pdfParse(pdfBuffer)
-  const parsed = parseBulletinText(text)
-
-  if (!parsed.forecastText.trim()) {
+  if (!bulletin.forecast_text.trim()) {
     throw new Error(
-      `PDF parse produced empty text for bulletin ${bulletin.id} — layout change or scanned PDF`
+      `PDF parse produced empty text for bulletin ${bulletin.bulletin_id} — layout change or scanned PDF`
     )
   }
 
-  return {
-    bulletin_id: bulletin.id,
-    matched_by_date: bulletin.matchedByDate,
-    warning_level: parsed.warningLevel,
-    forecast_text: parsed.forecastText,
-    rivers: parsed.rivers,
-    fetched_at: new Date().toISOString(),
-    source_url: pdfUrl,
-    pdfBuffer,
-  }
+  return bulletin
 }
