@@ -1,8 +1,9 @@
 name: PMD FFD ingest
 
+# Scrape ffd.pmd.gov.pk from GitHub runners (Vercel IPs are often bot-blocked),
+# then POST HTML into the app for parse/upsert + ingest_status.
 on:
   schedule:
-    # 00:40 and 12:40 UTC (~05:40 / 17:40 PKT)
     - cron: '40 0,12 * * *'
   workflow_dispatch:
 
@@ -10,22 +11,48 @@ jobs:
   ingest:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger PMD snapshot ingest
+      - name: Fetch PMD pages on GitHub runner
+        id: fetch
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/pmd
+          curl -fsSL --max-time 45 -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/124.0.0.0" \
+            "https://ffd.pmd.gov.pk/bulletin/bulletin" -o /tmp/pmd/listing.html || true
+          curl -fsSL --max-time 45 -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/124.0.0.0" \
+            "https://ffd.pmd.gov.pk/river-state" -o /tmp/pmd/river.html || true
+          echo "listing_bytes=$(wc -c < /tmp/pmd/listing.html 2>/dev/null || echo 0)"
+          echo "river_bytes=$(wc -c < /tmp/pmd/river.html 2>/dev/null || echo 0)"
+
+      - name: POST HTML to Vercel ingest
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           APP_URL: ${{ secrets.APP_URL }}
         run: |
           set -euo pipefail
-          if [ -z "${CRON_SECRET:-}" ]; then
-            echo "Missing secret CRON_SECRET" >&2
-            exit 1
-          fi
-          if [ -z "${APP_URL:-}" ]; then
-            echo "Missing secret APP_URL (e.g. https://your-app.vercel.app)" >&2
+          if [ -z "${CRON_SECRET:-}" ] || [ -z "${APP_URL:-}" ]; then
+            echo "Set secrets CRON_SECRET and APP_URL" >&2
             exit 1
           fi
           BASE="${APP_URL%/}"
-          echo "GET pmd-snapshot → ${BASE}/api/ingest/pmd-snapshot"
-          curl -fsS --max-time 90 \
-            -H "Authorization: Bearer ${CRON_SECRET}" \
-            "${BASE}/api/ingest/pmd-snapshot"
+          python3 - <<'PY'
+          import json, os, pathlib, urllib.request
+          base = os.environ["APP_URL"].rstrip("/")
+          secret = os.environ["CRON_SECRET"]
+          listing = pathlib.Path("/tmp/pmd/listing.html")
+          river = pathlib.Path("/tmp/pmd/river.html")
+          body = {
+            "listingHtml": listing.read_text(encoding="utf-8", errors="ignore") if listing.exists() else None,
+            "riverHtml": river.read_text(encoding="utf-8", errors="ignore") if river.exists() else None,
+          }
+          req = urllib.request.Request(
+            f"{base}/api/ingest/pmd-snapshot",
+            data=json.dumps(body).encode("utf-8"),
+            headers={
+              "Authorization": f"Bearer {secret}",
+              "Content-Type": "application/json",
+            },
+            method="POST",
+          )
+          with urllib.request.urlopen(req, timeout=90) as res:
+            print(res.read().decode())
+          PY
