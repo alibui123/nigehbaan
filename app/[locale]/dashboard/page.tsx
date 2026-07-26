@@ -28,7 +28,7 @@ export default async function DashboardPage({
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
-    redirect('/login')
+    redirect(`/${locale}/login`)
   }
 
   const today = new Date().toISOString().slice(0, 10)

@@ -9,6 +9,33 @@ type LanguageToggleProps = {
   variant?: 'floating' | 'header'
 }
 
+const LOCALE_RE = /^\/(en|ur)(?=\/|$)/
+
+/**
+ * Swap the leading /en|ur segment on the real browser path.
+ * Do not rely on usePathname() alone — with next-intl it can omit the locale
+ * prefix, which turned "/dashboard" into "/ur" and bounced users to login.
+ */
+function pathForLocale(nextLocale: string, pathnameFromHook: string): string {
+  const raw =
+    typeof window !== 'undefined'
+      ? `${window.location.pathname}${window.location.search}`
+      : pathnameFromHook
+
+  if (LOCALE_RE.test(raw)) {
+    return raw.replace(LOCALE_RE, `/${nextLocale}`)
+  }
+
+  // Hook pathname without locale (e.g. "/dashboard" or "/dashboard/alerts")
+  const normalized = pathnameFromHook.startsWith('/')
+    ? pathnameFromHook
+    : `/${pathnameFromHook}`
+  if (normalized === '/' || normalized === '') {
+    return `/${nextLocale}/dashboard`
+  }
+  return `/${nextLocale}${normalized}`
+}
+
 export default function LanguageToggle({
   currentLocale,
   variant = 'floating',
@@ -19,21 +46,14 @@ export default function LanguageToggle({
 
   function switchTo(locale: string) {
     if (locale === currentLocale) return
-    const segments = pathname.split('/')
-    segments[1] = locale
-    router.push(segments.join('/') || `/${locale}`)
+    router.replace(pathForLocale(locale, pathname))
   }
-
-  // Pages render this component explicitly (variant="header" in a page's own
-  // header, or variant="floating" for a page with no header chrome). There is
-  // no longer an automatic app-wide instance, so no route-detection is needed here.
 
   const shell =
     variant === 'floating'
       ? 'fixed bottom-4 end-4 z-50 shadow-lg'
       : 'shadow-sm'
 
-  // On light backgrounds (login), use a light shell so the control stays visible.
   const onLight = variant === 'header' && /\/(en|ur)\/login/.test(pathname)
   const palette = onLight
     ? 'border border-[var(--color-border)] bg-[var(--color-surface)]'

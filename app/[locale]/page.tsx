@@ -1,6 +1,10 @@
 import { redirect } from 'next/navigation'
-import { getTranslations } from 'next-intl/server'
 
-export default function Home() {
-  redirect('/login')
+export default async function Home({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}) {
+  const { locale } = await params
+  redirect(`/${locale}/login`)
 }

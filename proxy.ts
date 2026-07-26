@@ -4,7 +4,10 @@ import { updateSession } from '@/lib/supabase/middleware';
 
 const handleI18nRouting = createIntlMiddleware({
   locales: ['en', 'ur'],
-  defaultLocale: 'en'
+  defaultLocale: 'en',
+  // Avoid Accept-Language redirects fighting an explicit /en|/ur URL — those
+  // extra redirects are a common way to drop refreshed auth cookies on Vercel.
+  localeDetection: false,
 });
 
 export default async function proxy(request: NextRequest) {
