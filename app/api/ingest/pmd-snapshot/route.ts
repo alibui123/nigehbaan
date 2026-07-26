@@ -96,6 +96,8 @@ async function ensurePage(url: string, plain: PageResult): Promise<PageResult> {
 async function runIngest(params: {
   listingHtml: string | null
   riverHtml: string | null
+  pdfBuffer?: Buffer | null
+  pdfText?: string | null
   listingVia: PageResult['via']
   riverVia: PageResult['via']
   listingStatus?: number
@@ -125,11 +127,13 @@ async function runIngest(params: {
   const { pdfBuffer, pdfError, rivers, ...bulletin } = await buildPmdSnapshotFromHtml({
     listingHtml: params.listingHtml,
     riverHtml: params.riverHtml,
+    pdfBuffer: params.pdfBuffer,
+    pdfText: params.pdfText,
     pdfTimeoutMs: 15_000,
   })
 
   let snapshotPath: string | null = null
-  if (pdfBuffer) {
+  if (pdfBuffer && pdfBuffer.length > 1000) {
     const uploadPath = `pmd/bulletin_${bulletin.bulletin_id}_${Date.now()}.pdf`
     const { error: uploadError } = await supabase.storage
       .from('raw-snapshots')
@@ -137,14 +141,29 @@ async function runIngest(params: {
     if (!uploadError) snapshotPath = uploadPath
   }
 
-  const { error: insertError } = await supabase.from('pmd_forecasts').upsert(
-    {
-      ...bulletin,
-      rivers: riversToLegacyJson(rivers),
-      snapshot_path: snapshotPath,
-    },
-    { onConflict: 'bulletin_id' }
-  )
+  const forecastRow = {
+    bulletin_id: bulletin.bulletin_id,
+    matched_by_date: bulletin.matched_by_date,
+    warning_level: bulletin.warning_level,
+    forecast_text: bulletin.forecast_text,
+    rivers: riversToLegacyJson(rivers),
+    snapshot_path: snapshotPath,
+    source_url: bulletin.source_url,
+    fetched_at: bulletin.fetched_at,
+  }
+
+  const { data: existing, error: existingError } = await supabase
+    .from('pmd_forecasts')
+    .select('id')
+    .eq('bulletin_id', bulletin.bulletin_id)
+    .maybeSingle()
+  if (existingError) {
+    throw new Error(`pmd_forecasts lookup failed: ${existingError.message}`)
+  }
+
+  const { error: insertError } = existing
+    ? await supabase.from('pmd_forecasts').update(forecastRow).eq('id', existing.id)
+    : await supabase.from('pmd_forecasts').insert(forecastRow)
   if (insertError) {
     throw new Error(`pmd_forecasts insert failed: ${insertError.message}`)
   }
@@ -216,8 +235,9 @@ export async function GET(request: Request) {
 }
 
 /**
- * Preferred path on Hobby: GitHub Action scrapes PMD, then POSTs HTML here
- * so parse/DB writes still happen on Vercel with service role.
+ * Preferred path on Hobby: scrape PMD off-Vercel (GitHub runner or laptop),
+ * extract PDF text there, then POST here. Vercel IPs are often bot-blocked and
+ * cannot re-download the bulletin PDF.
  */
 export async function POST(request: Request) {
   if (!authorize(request)) {
@@ -229,6 +249,8 @@ export async function POST(request: Request) {
     const body = (await request.json()) as {
       listingHtml?: string | null
       riverHtml?: string | null
+      pdfBase64?: string | null
+      pdfText?: string | null
     }
 
     const listingHtml =
@@ -237,14 +259,22 @@ export async function POST(request: Request) {
         : null
     const riverHtml =
       typeof body.riverHtml === 'string' && body.riverHtml.length > 500 ? body.riverHtml : null
+    const pdfText =
+      typeof body.pdfText === 'string' && body.pdfText.trim().length > 40 ? body.pdfText : null
+    const pdfBuffer =
+      typeof body.pdfBase64 === 'string' && body.pdfBase64.length > 1000
+        ? Buffer.from(body.pdfBase64, 'base64')
+        : null
 
-    if (!listingHtml && !riverHtml) {
-      throw new Error('POST body must include listingHtml and/or riverHtml')
+    if (!listingHtml && !riverHtml && !pdfBuffer && !pdfText) {
+      throw new Error('POST body must include listingHtml, riverHtml, pdfText, and/or pdfBase64')
     }
 
     const result = await runIngest({
       listingHtml,
       riverHtml,
+      pdfBuffer,
+      pdfText,
       listingVia: 'posted',
       riverVia: 'posted',
       listingStatus: listingHtml ? 200 : 0,

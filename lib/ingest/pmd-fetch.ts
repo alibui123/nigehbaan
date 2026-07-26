@@ -324,50 +324,69 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
   })
 }
 
-/** Download + parse bulletin PDF from an already-fetched listing page. */
-export async function fetchPmdBulletinFromListing(
-  listingHtml: string,
-  options?: { pdfTimeoutMs?: number }
+/** Parse an already-downloaded bulletin PDF (no network). */
+export async function parsePmdBulletinPdf(
+  pdfBuffer: Buffer,
+  meta: { bulletinId: number; matchedByDate: boolean; sourceUrl: string }
 ): Promise<PmdBulletin & { pdfBuffer: Buffer }> {
-  const bulletin = findTodaysBulletin(listingHtml)
-  const pdfUrl = resolveUrl(bulletin.href)
-  const pdfTimeoutMs = options?.pdfTimeoutMs ?? 20_000
-
-  const pdfRes = await withTimeout(
-    fetch(pdfUrl, {
-      headers: { 'User-Agent': BROWSER_UA },
-      cache: 'no-store',
-    }),
-    pdfTimeoutMs,
-    'Bulletin PDF fetch'
-  )
-  if (!pdfRes.ok) {
-    throw new Error(`Bulletin PDF fetch failed (id ${bulletin.id}): HTTP ${pdfRes.status}`)
-  }
-
-  const pdfBuffer = Buffer.from(await pdfRes.arrayBuffer())
   const { text } = await withTimeout(pdfParse(pdfBuffer), 15_000, 'Bulletin PDF parse')
   const parsed = parseBulletinText(text)
 
   return {
-    bulletin_id: bulletin.id,
-    matched_by_date: bulletin.matchedByDate,
+    bulletin_id: meta.bulletinId,
+    matched_by_date: meta.matchedByDate,
     warning_level: parsed.warningLevel,
     forecast_text: parsed.forecastText,
     rivers: parsed.rivers,
     fetched_at: new Date().toISOString(),
-    source_url: pdfUrl,
+    source_url: meta.sourceUrl,
     pdfBuffer,
   }
+}
+
+/** Download + parse bulletin PDF from an already-fetched listing page. */
+export async function fetchPmdBulletinFromListing(
+  listingHtml: string,
+  options?: { pdfTimeoutMs?: number; pdfBuffer?: Buffer | null }
+): Promise<PmdBulletin & { pdfBuffer: Buffer }> {
+  const bulletin = findTodaysBulletin(listingHtml)
+  const pdfUrl = resolveUrl(bulletin.href)
+
+  let pdfBuffer = options?.pdfBuffer ?? null
+  if (!pdfBuffer) {
+    const pdfTimeoutMs = options?.pdfTimeoutMs ?? 20_000
+    const pdfRes = await withTimeout(
+      fetch(pdfUrl, {
+        headers: { 'User-Agent': BROWSER_UA },
+        cache: 'no-store',
+      }),
+      pdfTimeoutMs,
+      'Bulletin PDF fetch'
+    )
+    if (!pdfRes.ok) {
+      throw new Error(`Bulletin PDF fetch failed (id ${bulletin.id}): HTTP ${pdfRes.status}`)
+    }
+    pdfBuffer = Buffer.from(await pdfRes.arrayBuffer())
+  }
+
+  return parsePmdBulletinPdf(pdfBuffer, {
+    bulletinId: bulletin.id,
+    matchedByDate: bulletin.matchedByDate,
+    sourceUrl: pdfUrl,
+  })
 }
 
 /**
  * Build snapshot from already-fetched HTML. PDF is best-effort — river-state
  * gauges alone are enough to keep the feed healthy on a tight serverless budget.
+ * Prefer passing `pdfBuffer` or `pdfText` when the runtime IP is blocked by PMD
+ * (common on Vercel). Prefer `pdfText` over base64 PDF to stay under body size limits.
  */
 export async function buildPmdSnapshotFromHtml(params: {
   listingHtml: string | null
   riverHtml: string | null
+  pdfBuffer?: Buffer | null
+  pdfText?: string | null
   pdfTimeoutMs?: number
 }): Promise<PmdBulletin & { pdfBuffer: Buffer | null; pdfError: string | null }> {
   const htmlRivers = params.riverHtml ? parseRiverFlowsHtml(params.riverHtml) : []
@@ -384,13 +403,52 @@ export async function buildPmdSnapshotFromHtml(params: {
     listingError = 'Listing page unavailable'
   }
 
+  const fallbackBulletinId = Number(
+    `${new Date().getUTCFullYear()}${String(new Date().getUTCMonth() + 1).padStart(2, '0')}${String(new Date().getUTCDate()).padStart(2, '0')}`
+  )
+  const bulletinId = link?.id ?? fallbackBulletinId
+  const sourceUrl = link ? resolveUrl(link.href) : PMD_LISTING_URL
+
   let bulletin: (PmdBulletin & { pdfBuffer: Buffer }) | null = null
   let pdfError: string | null = listingError
 
-  if (link) {
+  if (typeof params.pdfText === 'string' && params.pdfText.trim().length > 40) {
+    try {
+      const parsed = parseBulletinText(params.pdfText)
+      bulletin = {
+        bulletin_id: bulletinId,
+        matched_by_date: link?.matchedByDate ?? false,
+        warning_level: parsed.warningLevel,
+        forecast_text: parsed.forecastText,
+        rivers: parsed.rivers,
+        fetched_at: new Date().toISOString(),
+        source_url: sourceUrl,
+        pdfBuffer: params.pdfBuffer ?? Buffer.alloc(0),
+      }
+      pdfError = null
+    } catch (err) {
+      pdfError = err instanceof Error ? err.message : String(err)
+    }
+  }
+
+  if (!bulletin && params.pdfBuffer && params.pdfBuffer.length > 1000) {
+    try {
+      bulletin = await parsePmdBulletinPdf(params.pdfBuffer, {
+        bulletinId,
+        matchedByDate: link?.matchedByDate ?? false,
+        sourceUrl,
+      })
+      pdfError = null
+    } catch (err) {
+      pdfError = err instanceof Error ? err.message : String(err)
+    }
+  }
+
+  if (!bulletin && link) {
     try {
       bulletin = await fetchPmdBulletinFromListing(params.listingHtml!, {
         pdfTimeoutMs: params.pdfTimeoutMs,
+        pdfBuffer: params.pdfBuffer,
       })
       pdfError = null
     } catch (err) {
@@ -420,12 +478,6 @@ export async function buildPmdSnapshotFromHtml(params: {
   }
 
   // River-state-only fallback — reuse real bulletin id when listing parsed.
-  const bulletinId =
-    link?.id ??
-    Number(
-      `${new Date().getUTCFullYear()}${String(new Date().getUTCMonth() + 1).padStart(2, '0')}${String(new Date().getUTCDate()).padStart(2, '0')}`
-    )
-
   return {
     bulletin_id: bulletinId,
     matched_by_date: link?.matchedByDate ?? false,

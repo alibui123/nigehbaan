@@ -26,7 +26,7 @@ jobs:
             exit 1
           fi
           BASE="${APP_URL%/}"
-          echo "POST simulate → ${BASE}/api/simulate/stations"
+          echo "GET simulate → ${BASE}/api/simulate/stations"
           curl -fsS --max-time 90 \
             -H "Authorization: Bearer ${CRON_SECRET}" \
             "${BASE}/api/simulate/stations"

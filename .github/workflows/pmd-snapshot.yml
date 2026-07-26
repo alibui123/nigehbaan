@@ -1,7 +1,7 @@
 name: PMD FFD ingest
 
-# Scrape ffd.pmd.gov.pk from GitHub runners (Vercel IPs are often bot-blocked),
-# then POST HTML into the app for parse/upsert + ingest_status.
+# Scrape ffd.pmd.gov.pk off Vercel (Vercel IPs are bot-blocked), extract PDF text,
+# then POST compact payload to the app for parse/upsert + ingest_status.
 on:
   schedule:
     - cron: '40 0,12 * * *'
@@ -11,19 +11,74 @@ jobs:
   ingest:
     runs-on: ubuntu-latest
     steps:
-      - name: Fetch PMD pages on GitHub runner
-        id: fetch
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v20
+        with:
+          node-version: '20'
+
+      - name: Scrape PMD listing + bulletin PDF
         run: |
           set -euo pipefail
           mkdir -p /tmp/pmd
-          curl -fsSL --max-time 45 -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/124.0.0.0" \
-            "https://ffd.pmd.gov.pk/bulletin/bulletin" -o /tmp/pmd/listing.html || true
-          curl -fsSL --max-time 45 -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/124.0.0.0" \
-            "https://ffd.pmd.gov.pk/river-state" -o /tmp/pmd/river.html || true
-          echo "listing_bytes=$(wc -c < /tmp/pmd/listing.html 2>/dev/null || echo 0)"
-          echo "river_bytes=$(wc -c < /tmp/pmd/river.html 2>/dev/null || echo 0)"
+          python3 -m pip install --quiet cloudscraper
+          python3 <<'PY'
+          import re, sys
+          from pathlib import Path
+          import cloudscraper
 
-      - name: POST HTML to Vercel ingest
+          out = Path("/tmp/pmd")
+          out.mkdir(parents=True, exist_ok=True)
+          scraper = cloudscraper.create_scraper(
+              browser={"browser": "chrome", "platform": "windows", "mobile": False}
+          )
+
+          def get(url: str) -> bytes:
+              r = scraper.get(url, timeout=90)
+              print(f"GET {url} -> {r.status_code} ({len(r.content)} bytes)")
+              r.raise_for_status()
+              return r.content
+
+          listing = get("https://ffd.pmd.gov.pk/bulletin/bulletin")
+          (out / "listing.html").write_bytes(listing)
+          html = listing.decode("utf-8", errors="ignore")
+          ids = [int(x) for x in re.findall(r"/bulletin/(\d+)/download", html)]
+          if not ids:
+              print("No bulletin download links in listing HTML", file=sys.stderr)
+              sys.exit(1)
+          bulletin_id = max(ids)
+          print(f"Using bulletin id {bulletin_id}")
+
+          try:
+              river = get("https://ffd.pmd.gov.pk/river-state")
+              (out / "river.html").write_bytes(river)
+          except Exception as err:
+              print(f"river-state skipped: {err}")
+
+          pdf = get(f"https://ffd.pmd.gov.pk/bulletin/{bulletin_id}/download")
+          (out / "bulletin.pdf").write_bytes(pdf)
+          print(f"pdf_bytes={len(pdf)}")
+          PY
+
+      - name: Extract PDF text with pdf-parse
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-package-lock pdf-parse@1.1.1
+          node <<'NODE'
+          const fs = require('fs');
+          const pdf = require('pdf-parse/lib/pdf-parse.js');
+          const buf = fs.readFileSync('/tmp/pmd/bulletin.pdf');
+          pdf(buf).then((d) => {
+            fs.writeFileSync('/tmp/pmd/bulletin.txt', d.text, 'utf8');
+            console.log('pdf_text_chars=' + d.text.length);
+            if (d.text.trim().length < 40) process.exit(1);
+          }).catch((err) => {
+            console.error(err);
+            process.exit(1);
+          });
+          NODE
+
+      - name: POST extracted bulletin to Vercel
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           APP_URL: ${{ secrets.APP_URL }}
@@ -33,26 +88,34 @@ jobs:
             echo "Set secrets CRON_SECRET and APP_URL" >&2
             exit 1
           fi
-          BASE="${APP_URL%/}"
-          python3 - <<'PY'
-          import json, os, pathlib, urllib.request
+          python3 <<'PY'
+          import json, os, pathlib, urllib.error, urllib.request
+
           base = os.environ["APP_URL"].rstrip("/")
           secret = os.environ["CRON_SECRET"]
           listing = pathlib.Path("/tmp/pmd/listing.html")
           river = pathlib.Path("/tmp/pmd/river.html")
+          text = pathlib.Path("/tmp/pmd/bulletin.txt")
           body = {
             "listingHtml": listing.read_text(encoding="utf-8", errors="ignore") if listing.exists() else None,
             "riverHtml": river.read_text(encoding="utf-8", errors="ignore") if river.exists() else None,
+            "pdfText": text.read_text(encoding="utf-8", errors="ignore") if text.exists() else None,
           }
+          data = json.dumps(body).encode("utf-8")
+          print(f"POST bytes={len(data)}")
           req = urllib.request.Request(
             f"{base}/api/ingest/pmd-snapshot",
-            data=json.dumps(body).encode("utf-8"),
+            data=data,
             headers={
               "Authorization": f"Bearer {secret}",
               "Content-Type": "application/json",
             },
             method="POST",
           )
-          with urllib.request.urlopen(req, timeout=90) as res:
-            print(res.read().decode())
+          try:
+            with urllib.request.urlopen(req, timeout=90) as res:
+              print(res.read().decode())
+          except urllib.error.HTTPError as err:
+            print(err.read().decode(), flush=True)
+            raise
           PY
