@@ -229,7 +229,17 @@ export async function GET(request: Request) {
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     console.error(`[ingest:${SOURCE}]`, message)
-    await writeIngestStatus(supabase, SOURCE, 'failed', message)
+    // Vercel IPs are often blocked by PMD. Don't overwrite a recent successful
+    // off-Vercel ingest (local script) with a hard failure from this path.
+    const { data: prev } = await supabase
+      .from('ingest_status')
+      .select('last_success_at')
+      .eq('source', SOURCE)
+      .maybeSingle()
+    const recentOk =
+      prev?.last_success_at &&
+      Date.now() - new Date(prev.last_success_at).getTime() < 36 * 60 * 60 * 1000
+    await writeIngestStatus(supabase, SOURCE, recentOk ? 'degraded' : 'failed', message)
     return NextResponse.json({ ok: false, error: message }, { status: 500 })
   }
 }
