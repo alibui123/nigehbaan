@@ -1,5 +1,5 @@
 import createIntlMiddleware from 'next-intl/middleware';
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
 
 const handleI18nRouting = createIntlMiddleware({
@@ -7,15 +7,22 @@ const handleI18nRouting = createIntlMiddleware({
   defaultLocale: 'en'
 });
 
-export default async function middleware(request: NextRequest) {
-  // 1. Let next-intl resolve locale routing/redirects first. This may itself
-  //    be a redirect (e.g. "/" -> "/en").
-  const intlResponse = handleI18nRouting(request);
+export default async function proxy(request: NextRequest) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ''
 
-  // 2. Hand that response to updateSession: it refreshes the Supabase auth
-  //    cookies onto it, and returns its own redirect to /login instead if
-  //    the user isn't authenticated. This was previously never called at
-  //    all, so sessions silently went stale and auth redirects never fired.
+  if (!supabaseUrl.startsWith('http') || !anonKey) {
+    return new NextResponse(
+      [
+        'Server misconfigured: set NEXT_PUBLIC_SUPABASE_URL to the full URL',
+        '(https://YOUR_PROJECT.supabase.co) and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel.',
+        `Current URL value looks like: ${supabaseUrl ? supabaseUrl.slice(0, 48) : '(empty)'}`,
+      ].join(' '),
+      { status: 500, headers: { 'content-type': 'text/plain; charset=utf-8' } }
+    )
+  }
+
+  const intlResponse = handleI18nRouting(request);
   return await updateSession(request, intlResponse);
 }
 
