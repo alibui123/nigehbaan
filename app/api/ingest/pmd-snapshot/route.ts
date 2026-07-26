@@ -22,6 +22,20 @@ type PageResult = {
   error?: string
 }
 
+function listingLooksValid(html: string) {
+  return /\/bulletin\/\d+\/download/i.test(html)
+}
+
+function riverPageLooksValid(html: string) {
+  return /discharge\s*:/i.test(html) || /cusecs/i.test(html) || /flood\s+level/i.test(html)
+}
+
+function pageLooksUseful(url: string, html: string) {
+  if (url.includes('bulletin')) return listingLooksValid(html)
+  if (url.includes('river-state') || url.includes('river-flows')) return riverPageLooksValid(html)
+  return html.length > 2000
+}
+
 async function fetchPlain(url: string): Promise<PageResult> {
   try {
     const res = await fetch(url, {
@@ -29,14 +43,14 @@ async function fetchPlain(url: string): Promise<PageResult> {
       cache: 'no-store',
     })
     const html = await res.text()
-    if (res.ok && html.length > 2000) {
+    if (res.ok && pageLooksUseful(url, html)) {
       return { status: res.status, html, via: 'fetch' }
     }
     return {
       status: res.status,
       html,
       via: 'fetch',
-      error: `HTTP ${res.status}, body ${html.length}b (likely bot-blocked)`,
+      error: `HTTP ${res.status}, body ${html.length}b (missing expected PMD content)`,
     }
   } catch (err) {
     return {
@@ -49,19 +63,19 @@ async function fetchPlain(url: string): Promise<PageResult> {
 }
 
 async function ensurePage(url: string, plain: PageResult): Promise<PageResult> {
-  if (plain.html && plain.html.length > 2000 && plain.status >= 200 && plain.status < 400) {
+  if (plain.html && pageLooksUseful(url, plain.html) && plain.status >= 200 && plain.status < 400) {
     return plain
   }
   try {
-    const browser = await fetchHtmlWithBrowser(url, { timeoutMs: 22_000, waitMs: 1200 })
-    if (browser.html.length > 2000) {
+    const browser = await fetchHtmlWithBrowser(url, { timeoutMs: 25_000, waitMs: 2500 })
+    if (pageLooksUseful(url, browser.html)) {
       return { status: browser.status, html: browser.html, via: 'browser' }
     }
     return {
       status: browser.status,
       html: browser.html || plain.html,
       via: 'browser',
-      error: plain.error ?? `browser HTTP ${browser.status}`,
+      error: plain.error ?? `browser returned unusable HTML (${browser.html.length}b)`,
     }
   } catch (err) {
     return {
