@@ -4,6 +4,13 @@ import createNextIntlPlugin from 'next-intl/plugin';
 const withNextIntl = createNextIntlPlugin('./i18n.ts');
 
 const nextConfig: NextConfig = {
+  // pdfkit loads Helvetica*.afm via fs from its package data/ folder.
+  // Bundling breaks that path (ENOENT …/ROOT/node_modules/pdfkit/js/data/…).
+  serverExternalPackages: ['pdfkit', 'fontkit'],
+  // Ensure AFM metrics ship with the Vercel serverless function.
+  outputFileTracingIncludes: {
+    '/api/report/generate': ['./node_modules/pdfkit/js/data/**/*'],
+  },
   // Tree-shakes deck.gl / maplibre / react-map-gl so only the sub-modules
   // actually used get bundled, instead of pulling in the full packages.
   experimental: {
