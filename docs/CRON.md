@@ -38,6 +38,16 @@ Settings → Secrets and variables → Actions:
 
 Use **Run workflow** on each to verify after the first Vercel deploy.
 
-## 4. Vercel cron (`vercel.json`)
+## 4. Vercel cron (`vercel.json`) — Hobby compatible
 
-Daily/hourly backups for ingest + simulate. Sub-30‑minute freshness depends on the GitHub station simulator above.
+**Vercel Hobby only allows each cron to run once per day.**  
+So `vercel.json` uses daily schedules only (backup).
+
+| Need | Who runs it |
+|---|---|
+| Stations every ~10 min | **GitHub Actions** → Simulate Station Telemetry |
+| Station health tickets | **GitHub Actions** → Station Health Sweep |
+| PMD twice daily | **GitHub Actions** → PMD FFD ingest |
+| Daily feed ingest | Vercel cron **or** GitHub → Ingest feeds |
+
+Do **not** put `*/10`, `0 * * * *`, or `0,12` in `vercel.json` on Hobby — Vercel will reject the deploy.
