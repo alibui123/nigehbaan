@@ -1,0 +1,17 @@
+name: PMD FFD ingest
+
+on:
+  schedule:
+    # Mirror vercel.json — 00:40 and 12:40 UTC (~05:40 / 17:40 PKT)
+    - cron: '40 0,12 * * *'
+  workflow_dispatch:
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger PMD snapshot ingest
+        run: |
+          curl -f --max-time 90 \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "https://nigheban-ews.vercel.app/api/ingest/pmd-snapshot"
