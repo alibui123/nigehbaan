@@ -39,7 +39,7 @@ npm run mqtt:bridge
 
 ## Cron & station simulation (production)
 
-See **[docs/CRON.md](docs/CRON.md)** for Vercel + GitHub Actions setup. Stations go **offline after 30 minutes** without new readings — keep the **Simulate Station Telemetry** Action running every 10 minutes with secrets `CRON_SECRET` and `APP_URL`.
+See **[docs/CRON.md](docs/CRON.md)** for Vercel + GitHub Actions setup. Stations go **offline after 120 minutes** without new readings — keep the **Simulate Station Telemetry** Action scheduled (with secrets `CRON_SECRET` and `APP_URL`).
 
 ## Branch model
 

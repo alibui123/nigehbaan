@@ -1,6 +1,6 @@
 name: Simulate Station Telemetry
 
-# Keeps station_health online: status goes offline if last reading > 30 minutes.
+# Keeps station_health online: status goes offline if last reading > 120 minutes.
 # Vercel Hobby only runs crons once/day, so GitHub Actions is the reliable scheduler.
 on:
   schedule:

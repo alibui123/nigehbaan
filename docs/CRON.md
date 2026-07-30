@@ -4,11 +4,12 @@ Station status in `station_health` is **derived from reading age**:
 
 | Last reading | Status |
 |---|---|
-| missing or **> 30 min** | offline |
-| 15–30 min | degraded |
-| < 15 min | online |
+| missing or **> 120 min** | offline |
+| 60–120 min | degraded |
+| < 60 min (and battery OK) | online |
+| battery **&lt; 11.0 V** | degraded |
 
-So `/api/simulate/stations` must keep writing telemetry. On **Vercel Hobby**, frequent crons are limited — use **GitHub Actions** as the primary sub-hourly scheduler.
+So `/api/simulate/stations` must keep writing telemetry. On **Vercel Hobby**, frequent crons are limited — use **GitHub Actions** as the primary scheduler (note: GH `*/10` crons are often delayed to ~hourly).
 
 ## 1. Vercel project
 
@@ -38,29 +39,34 @@ Settings → Secrets and variables → Actions:
 
 ### PMD FFD note
 
-`ffd.pmd.gov.pk` blocks Vercel and GitHub Actions IPs (HTTP 403). When Actions fail:
+Both **Vercel cron** and **GitHub Actions** call PMD ingest:
 
-```bash
-# from a normal network (laptop), with Vercel CRON_SECRET:
-CRON_SECRET=your_vercel_secret node scripts/pmd-ingest-local.mjs https://nigehbaan1.vercel.app
+| Caller | How | Schedule |
+|---|---|---|
+| Vercel | `GET /api/ingest/pmd-snapshot` (`vercel.json`) | once daily `40 0 * * *` UTC (Hobby limit) |
+| GitHub **PMD FFD ingest** | scrape off-Vercel → `POST` PDF text | 00:40 & 12:40 UTC |
+| GitHub **Ingest feeds** | `GET /api/ingest/pmd-snapshot` (backup) | 01:15 UTC |
+
+`ffd.pmd.gov.pk` often blocks cloud IPs (HTTP 403). When cloud runs fail, scrape from a normal network:
+
+```powershell
+node scripts/pmd-ingest-local.mjs https://nigehbaan1.vercel.app
 ```
 
-That scrapes the bulletin PDF locally, extracts text, and POSTs to production so the PMD FFD pill stays green.
+(Uses `CRON_SECRET` from `.env.local`.)
 
 Use **Run workflow** on Simulate Station Telemetry to verify stations after the first Vercel deploy.
 
 ## 4. Vercel cron (`vercel.json`) — Hobby compatible
 
 **Vercel Hobby only allows each cron to run once per day.**  
-So `vercel.json` uses daily schedules only (backup).
+So `vercel.json` uses daily schedules only (GitHub Actions is the frequent scheduler).
 
 | Need | Who runs it |
 |---|---|
 | Stations every ~10 min | **GitHub Actions** → Simulate Station Telemetry |
 | Station health tickets | **GitHub Actions** → Station Health Sweep |
-| PMD twice daily | **Local script** `scripts/pmd-ingest-local.mjs` (PMD blocks cloud IPs); GH Actions tries cloudscraper as backup |
+| PMD | **Vercel cron** (daily GET) + **GitHub PMD FFD ingest** (scrape+POST, twice daily) + local script fallback |
 | Daily feed ingest | Vercel cron **or** GitHub → Ingest feeds |
 
-PMD is **not** in `vercel.json` — Vercel cannot fetch the bulletin.
-
-Do **not** put `*/10`, `0 * * * *`, or `0,12` in `vercel.json` on Hobby — Vercel will reject the deploy.
+Do **not** put `*/10` or hourly crons in `vercel.json` on Hobby — Vercel will reject the deploy.
