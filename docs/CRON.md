@@ -19,7 +19,8 @@ Jobs live entirely on Supabase (project `ksdcjwpbusadklpdwfsz`):
 |---|---|---|---|
 | `nigheban-station-sim` | every 10 min | `cron-station-sim` | Writes `station_reading` + `ingest_status.station_sim=ok` → stations stay online |
 | `nigheban-station-health` | every 15 min | `cron-station-health` | Opens/closes `maintenance_ticket` rows |
-| `nigheban-feed-dispatch` | `20 1 * * *` | `cron-feed-dispatch` | GETs Render/Vercel `/api/ingest/*` (needs `APP_URL` + `CRON_SECRET` secrets) |
+| `nigheban-feed-dispatch` | `20 1 * * *` | `cron-feed-dispatch` | GETs all `/api/ingest/*` on Render (incl. PMD) |
+| `nigheban-pmd-snapshot` | `40 0,12 * * *` | `cron-feed-dispatch` (PMD path only) | Extra PMD GET attempts; GH POST remains backup |
 
 Dashboard: **Database → Cron Jobs**, or:
 
@@ -33,6 +34,10 @@ Manual invoke:
 select public.invoke_edge_function('cron-station-sim');
 select public.invoke_edge_function('cron-station-health');
 select public.invoke_edge_function('cron-feed-dispatch');
+select public.invoke_edge_function(
+  'cron-feed-dispatch',
+  '{"paths":["/api/ingest/pmd-snapshot"]}'::jsonb
+);
 ```
 
 ### Vault secrets (required for `invoke_edge_function`)
@@ -76,10 +81,10 @@ Set GitHub secrets `CRON_SECRET` + `APP_URL` to your Render URL.
 
 ### PMD note
 
-Prefer GitHub **PMD FFD ingest** or local:
+**Primary (Supabase):** `nigheban-pmd-snapshot` + daily `nigheban-feed-dispatch` call `GET /api/ingest/pmd-snapshot` on `APP_URL` (Render). Cloud scrapes often get 403; the GET handler preserves `pmd_ffd=ok` when data is &lt; 24h old.
+
+**Backup (GitHub):** workflow **PMD FFD ingest** scrapes off-cloud and `POST`s PDF text (most reliable). Local fallback:
 
 ```powershell
 node scripts/pmd-ingest-local.mjs https://nigehbaan-wyiu.onrender.com
 ```
-
-Cloud GET of `ffd.pmd.gov.pk` often returns 403; successful POSTs still keep `pmd_ffd` green when data is fresh.

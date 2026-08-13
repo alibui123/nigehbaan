@@ -3,13 +3,16 @@ import { authorize, json } from '../_shared/cron.ts'
 /**
  * Fan-out to the app host (Render/Vercel) for Node-heavy ingest routes.
  * Set APP_URL + CRON_SECRET as Edge Function secrets.
- * PMD scrape often fails from cloud IPs — prefer the dedicated GH/local POST path.
+ *
+ * PMD GET often fails from cloud IPs; GitHub "PMD FFD ingest" (scrape→POST)
+ * remains the reliable backup. Fresh-data GET failures no longer flip status red.
  */
-const FEED_PATHS = [
+const DEFAULT_FEED_PATHS = [
   '/api/ingest/flood-open-meteo',
   '/api/ingest/open-meteo',
   '/api/ingest/usgs',
   '/api/ingest/firms',
+  '/api/ingest/pmd-snapshot',
   '/api/ingest/irsa',
   '/api/ingest/drought',
   '/api/ingest/advisories',
@@ -33,9 +36,21 @@ Deno.serve(async (req) => {
     )
   }
 
+  let paths = DEFAULT_FEED_PATHS
+  if (req.method === 'POST') {
+    try {
+      const body = await req.json()
+      if (Array.isArray(body?.paths) && body.paths.every((p: unknown) => typeof p === 'string')) {
+        paths = body.paths as string[]
+      }
+    } catch {
+      // empty / invalid body → defaults
+    }
+  }
+
   const results: { path: string; status: number; ok: boolean; body?: string }[] = []
 
-  for (const path of FEED_PATHS) {
+  for (const path of paths) {
     try {
       const res = await fetch(`${appUrl}${path}`, {
         method: 'GET',
