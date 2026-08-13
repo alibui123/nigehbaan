@@ -1,0 +1,46 @@
+# Render Blueprint — full Next.js app (frontend + API routes).
+# Connect this repo in Render Dashboard → New → Blueprint, or New → Web Service manually.
+# Supabase stays hosted separately; set Supabase URL/keys as env vars below.
+
+services:
+  - type: web
+    name: nigheban-ews
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/ingest-status
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: NODE_ENV
+        value: production
+      # --- Supabase (required) ---
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      # --- Cron / ingest auth (required for GitHub Actions + Render cron hits) ---
+      - key: CRON_SECRET
+        generateValue: true
+      # --- Map & feeds ---
+      - key: NEXT_PUBLIC_MAPLIBRE_STYLE_URL
+        sync: false
+      - key: FIRMS_MAP_KEY
+        sync: false
+      # --- Optional: Twilio live dispatch ---
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_SMS_FROM
+        sync: false
+      - key: TWILIO_WHATSAPP_FROM
+        sync: false
+      - key: TWILIO_WHATSAPP_TO
+        sync: false
+      - key: TWILIO_WHATSAPP_CONTENT_SID
+        sync: false
