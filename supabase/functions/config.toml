@@ -1,0 +1,10 @@
+# Edge Functions
+
+[functions.cron-station-sim]
+verify_jwt = false
+
+[functions.cron-station-health]
+verify_jwt = false
+
+[functions.cron-feed-dispatch]
+verify_jwt = false

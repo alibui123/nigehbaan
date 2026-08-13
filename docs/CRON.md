@@ -1,4 +1,4 @@
-# Cron & simulation setup (Vercel + GitHub Actions)
+# Cron & simulation setup (Supabase-native + optional GitHub/Render)
 
 Station status in `station_health` is **derived from reading age**:
 
@@ -9,64 +9,77 @@ Station status in `station_health` is **derived from reading age**:
 | < 60 min (and battery OK) | online |
 | battery **&lt; 11.0 V** | degraded |
 
-So `/api/simulate/stations` must keep writing telemetry. On **Vercel Hobby**, frequent crons are limited — use **GitHub Actions** as the primary scheduler (note: GH `*/10` crons are often delayed to ~hourly).
+The frontend footer (`SourceHealthFooter`) and district “Data Source Health” panels read **`ingest_status`**. Cron Edge Functions write that table after each run — no extra push channel needed.
 
-## 1. Vercel project
+## Primary: Supabase Edge Functions + `pg_cron`
 
-1. Import [alibui123/nigehbaan](https://github.com/alibui123/nigehbaan).
-2. Set env vars (same as local `.env.local`), including:
-   - `CRON_SECRET` — required; Vercel Cron sends `Authorization: Bearer <CRON_SECRET>`
-   - Supabase, map style, `FIRMS_MAP_KEY`, etc.
-3. Deploy and copy the deployment URL (e.g. `https://nigehbaan.vercel.app`).
+Jobs live entirely on Supabase (project `ksdcjwpbusadklpdwfsz`):
 
-## 2. GitHub repo secrets
+| Job name | Schedule (UTC) | Edge Function | Effect on frontend |
+|---|---|---|---|
+| `nigheban-station-sim` | every 10 min | `cron-station-sim` | Writes `station_reading` + `ingest_status.station_sim=ok` → stations stay online |
+| `nigheban-station-health` | every 15 min | `cron-station-health` | Opens/closes `maintenance_ticket` rows |
+| `nigheban-feed-dispatch` | `20 1 * * *` | `cron-feed-dispatch` | GETs Render/Vercel `/api/ingest/*` (needs `APP_URL` + `CRON_SECRET` secrets) |
 
-Settings → Secrets and variables → Actions:
+Dashboard: **Database → Cron Jobs**, or:
 
-| Secret | Example |
+```sql
+select jobid, jobname, schedule, active from cron.job order by jobid;
+```
+
+Manual invoke:
+
+```sql
+select public.invoke_edge_function('cron-station-sim');
+select public.invoke_edge_function('cron-station-health');
+select public.invoke_edge_function('cron-feed-dispatch');
+```
+
+### Vault secrets (required for `invoke_edge_function`)
+
+| Vault name | Value |
 |---|---|
-| `CRON_SECRET` | same value as Vercel `CRON_SECRET` |
-| `APP_URL` | `https://your-deployment.vercel.app` (no trailing slash) |
+| `project_url` | `https://ksdcjwpbusadklpdwfsz.supabase.co` |
+| `service_role_key` | Supabase service role key |
+| `app_url` | e.g. `https://nigehbaan-wyiu.onrender.com` (feed dispatch) |
+| `cron_secret` | same as app `CRON_SECRET` |
 
-## 3. Workflows (Actions tab)
+### Edge Function secrets
+
+```bash
+npx supabase secrets set --project-ref ksdcjwpbusadklpdwfsz \
+  CRON_SECRET=... \
+  APP_URL=https://nigehbaan-wyiu.onrender.com
+```
+
+`SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` are injected automatically.
+
+### Deploy / update functions
+
+```bash
+npx supabase functions deploy cron-station-sim cron-station-health cron-feed-dispatch \
+  --project-ref ksdcjwpbusadklpdwfsz
+```
+
+## Backup: GitHub Actions + Render/Vercel
+
+Still useful if Edge Functions are paused or for PMD scrape (PMD often blocks cloud IPs):
 
 | Workflow | Schedule | Endpoint |
 |---|---|---|
-| **Simulate Station Telemetry** | every 10 min | `/api/simulate/stations` |
-| **Station Health Sweep** | every 15 min | `/api/cron/station-health` |
-| **PMD FFD ingest** | 00:40 & 12:40 UTC | scrape + POST `/api/ingest/pmd-snapshot` |
-| **Ingest feeds (daily)** | 01:15 UTC | all `/api/ingest/*` |
+| Simulate Station Telemetry | ~every 10–60 min | `/api/simulate/stations` |
+| Station Health Sweep | ~every 15 min | `/api/cron/station-health` |
+| PMD FFD ingest | 00:40 & 12:40 UTC | scrape → `POST /api/ingest/pmd-snapshot` |
+| Ingest feeds | 01:15 UTC | all `/api/ingest/*` |
 
-### PMD FFD note
+Set GitHub secrets `CRON_SECRET` + `APP_URL` to your Render URL.
 
-Both **Vercel cron** and **GitHub Actions** call PMD ingest:
+### PMD note
 
-| Caller | How | Schedule |
-|---|---|---|
-| Vercel | `GET /api/ingest/pmd-snapshot` (`vercel.json`) | once daily `40 0 * * *` UTC (Hobby limit) |
-| GitHub **PMD FFD ingest** | scrape off-Vercel → `POST` PDF text | 00:40 & 12:40 UTC |
-| GitHub **Ingest feeds** | `GET /api/ingest/pmd-snapshot` (backup) | 01:15 UTC |
-
-`ffd.pmd.gov.pk` often blocks cloud IPs (HTTP 403). When cloud runs fail, scrape from a normal network:
+Prefer GitHub **PMD FFD ingest** or local:
 
 ```powershell
-node scripts/pmd-ingest-local.mjs https://nigehbaan1.vercel.app
+node scripts/pmd-ingest-local.mjs https://nigehbaan-wyiu.onrender.com
 ```
 
-(Uses `CRON_SECRET` from `.env.local`.)
-
-Use **Run workflow** on Simulate Station Telemetry to verify stations after the first Vercel deploy.
-
-## 4. Vercel cron (`vercel.json`) — Hobby compatible
-
-**Vercel Hobby only allows each cron to run once per day.**  
-So `vercel.json` uses daily schedules only (GitHub Actions is the frequent scheduler).
-
-| Need | Who runs it |
-|---|---|
-| Stations every ~10 min | **GitHub Actions** → Simulate Station Telemetry |
-| Station health tickets | **GitHub Actions** → Station Health Sweep |
-| PMD | **Vercel cron** (daily GET) + **GitHub PMD FFD ingest** (scrape+POST, twice daily) + local script fallback |
-| Daily feed ingest | Vercel cron **or** GitHub → Ingest feeds |
-
-Do **not** put `*/10` or hourly crons in `vercel.json` on Hobby — Vercel will reject the deploy.
+Cloud GET of `ffd.pmd.gov.pk` often returns 403; successful POSTs still keep `pmd_ffd` green when data is fresh.
