@@ -14,6 +14,22 @@ export const runtime = 'nodejs'
 export const maxDuration = 60
 
 const SOURCE = 'pmd_ffd'
+/** Cloud GET failures must not downgrade status when off-Vercel ingest succeeded recently. */
+const FRESH_DATA_HOURS = 24
+const DEGRADED_DATA_HOURS = 36
+
+async function getPmdIngestAgeHours(supabase: ReturnType<typeof createAdminClient>) {
+  const { data: prev } = await supabase
+    .from('ingest_status')
+    .select('last_success_at, status')
+    .eq('source', SOURCE)
+    .maybeSingle()
+
+  if (!prev?.last_success_at) return { hours: null, status: prev?.status ?? null }
+
+  const hours = (Date.now() - new Date(prev.last_success_at).getTime()) / (1000 * 60 * 60)
+  return { hours, status: prev.status ?? null, lastSuccessAt: prev.last_success_at }
+}
 
 type PageResult = {
   status: number
@@ -230,17 +246,27 @@ export async function GET(request: Request) {
     const message = err instanceof Error ? err.message : String(err)
     console.error(`[ingest:${SOURCE}]`, message)
     // Vercel IPs are often blocked by PMD. Don't overwrite a recent successful
-    // off-Vercel ingest (local script) with a hard failure from this path.
-    const { data: prev } = await supabase
-      .from('ingest_status')
-      .select('last_success_at')
-      .eq('source', SOURCE)
-      .maybeSingle()
-    const recentOk =
-      prev?.last_success_at &&
-      Date.now() - new Date(prev.last_success_at).getTime() < 36 * 60 * 60 * 1000
-    await writeIngestStatus(supabase, SOURCE, recentOk ? 'degraded' : 'failed', message)
-    return NextResponse.json({ ok: false, error: message }, { status: 500 })
+    // off-Vercel ingest (GitHub POST / local script) when this cloud GET fails.
+    const { hours, status, lastSuccessAt } = await getPmdIngestAgeHours(supabase)
+
+    if (hours != null && hours < FRESH_DATA_HOURS) {
+      console.warn(
+        `[ingest:${SOURCE}] cloud scrape failed; preserving status "${status ?? 'ok'}" (${hours.toFixed(1)}h since last success)`
+      )
+      return NextResponse.json({
+        ok: false,
+        skipped: true,
+        error: message,
+        reason: `Cloud scrape failed; ingest_status unchanged (fresh data within ${FRESH_DATA_HOURS}h)`,
+        lastSuccessAt,
+        statusPreserved: status ?? 'ok',
+      })
+    }
+
+    const nextStatus =
+      hours != null && hours < DEGRADED_DATA_HOURS ? ('degraded' as const) : ('failed' as const)
+    await writeIngestStatus(supabase, SOURCE, nextStatus, message)
+    return NextResponse.json({ ok: false, error: message, status: nextStatus }, { status: 500 })
   }
 }
 
