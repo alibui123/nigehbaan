@@ -92,9 +92,11 @@ export function startDashboardBootstrap() {
       BOOT_ENDPOINTS.map(async (ep) => {
         try {
           const res = await fetch(ep.url)
-          const json = await res.json()
-          if (ep.key === 'districts') {
-            districtGeo = json
+          if (res.ok) {
+            const json = await res.json()
+            if (ep.key === 'districts') {
+              districtGeo = json
+            }
           }
         } catch {
           /* count step anyway */

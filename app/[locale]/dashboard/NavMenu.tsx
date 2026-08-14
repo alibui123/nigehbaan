@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { beginRouteLoad } from '@/lib/route-load-overlay'
 import { isDashboardBootDone } from '@/lib/dashboard-bootstrap'
+import LogoutButton from '@/components/LogoutButton'
 
 type NavMenuProps = {
   locale: string
@@ -294,8 +295,9 @@ export default function NavMenu({ locale, isOps, role, districtId, userLabel }: 
             ))}
           </nav>
 
-          <div className="border-t border-[var(--color-border)] px-4 py-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
-            <p className="text-[11px] leading-relaxed text-[var(--color-ink)]/45">{t('provincialOverview')}</p>
+          <div className="border-t border-[var(--color-border)] p-3 pb-[max(1rem,env(safe-area-inset-bottom))] space-y-2">
+            <LogoutButton locale={locale} variant="drawer" onSignOut={() => setOpen(false)} />
+            <p className="px-1 text-[11px] leading-relaxed text-[var(--color-ink)]/45">{t('provincialOverview')}</p>
           </div>
         </div>
       </div>,
@@ -395,6 +397,8 @@ export default function NavMenu({ locale, isOps, role, districtId, userLabel }: 
               )}
             </a>
           ))}
+          <div className="my-1 border-t border-[var(--color-border)]/60" />
+          <LogoutButton locale={locale} variant="menu" onSignOut={() => setOpen(false)} />
         </nav>
 
         <div className="border-t border-[var(--color-border)] bg-[var(--color-base)]/60 px-3.5 py-2.5">

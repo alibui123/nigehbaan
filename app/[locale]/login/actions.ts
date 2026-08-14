@@ -20,3 +20,9 @@ export async function signIn(formData: FormData) {
 
   redirect('/dashboard?boot=1')
 }
+
+export async function signOut(locale: string) {
+  const supabase = await createClient()
+  await supabase.auth.signOut()
+  redirect(`/${locale}/login`)
+}

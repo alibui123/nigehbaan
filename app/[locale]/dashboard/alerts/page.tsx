@@ -131,12 +131,14 @@ export default async function AlertsReviewPage({
                               : '—'}
                           </span>
                         </div>
-                        <Link
-                          href={`/${locale}/dashboard/alerts/${c.id}`}
-                          className="block text-base font-semibold leading-snug text-[var(--color-ink)] active:opacity-70 sm:text-lg"
-                        >
-                          {text.headline}
-                        </Link>
+                        <h3 className="text-base font-semibold leading-snug sm:text-lg">
+                          <Link
+                            href={`/${locale}/dashboard/alerts/${c.id}`}
+                            className="text-ink no-underline hover:text-[var(--color-primary)] active:opacity-70"
+                          >
+                            {text.headline}
+                          </Link>
+                        </h3>
                         <p className="mt-1 text-sm text-[var(--color-ink)]/65">{text.event}</p>
                         <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
                           <Link
@@ -245,12 +247,14 @@ export default async function AlertsReviewPage({
                           {new Date(c.created_at).toLocaleString(locale === 'ur' ? 'ur-PK' : 'en-GB')}
                         </span>
                       </div>
-                      <Link
-                        href={`/${locale}/dashboard/alerts/${c.id}`}
-                        className="block text-base font-semibold leading-snug text-[var(--color-ink)] active:opacity-70 sm:text-lg"
-                      >
-                        {text.headline}
-                      </Link>
+                      <h3 className="text-base font-semibold leading-snug sm:text-lg">
+                        <Link
+                          href={`/${locale}/dashboard/alerts/${c.id}`}
+                          className="text-ink no-underline hover:text-[var(--color-primary)] active:opacity-70"
+                        >
+                          {text.headline}
+                        </Link>
+                      </h3>
                       <p className="mt-1 text-sm text-[var(--color-ink)]/65">{c.description || text.event}</p>
 
                       <div className="mt-3 grid grid-cols-2 gap-2 rounded-xl bg-[var(--color-base)] p-3 font-mono text-[11px]">

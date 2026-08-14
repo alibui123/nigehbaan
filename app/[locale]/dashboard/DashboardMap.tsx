@@ -323,6 +323,7 @@ export default function DashboardMap() {
         new GeoJsonLayer({
           id: 'ffd-river-layer',
           data: '/api/pmd/river-flows',
+          onDataLoadError: (err) => console.warn('FFD river layer load error:', err),
           pickable: true,
           pointType: 'circle',
           getPointRadius: 9000,

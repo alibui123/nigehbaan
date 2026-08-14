@@ -23,6 +23,16 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Keep dashboard card titles readable — anchor defaults must not wash out link text */
+a.text-ink,
+a.text-ink:visited,
+a.text-ink:hover {
+  color: var(--color-ink);
+}
+a.text-ink:hover {
+  color: var(--color-primary);
+}
+
 html[lang="ur"] body {
   font-family: var(--font-urdu), var(--font-sans);
   line-height: 1.8;

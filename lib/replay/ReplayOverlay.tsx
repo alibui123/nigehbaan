@@ -58,7 +58,8 @@ export default function ReplayOverlay() {
           <select
             value={speedMultiplier}
             onChange={(e) => setSpeedMultiplier(Number(e.target.value))}
-            className="rounded border border-white/30 bg-white/10 px-2 py-1 text-white"
+            aria-label="Playback speed"
+            className="cursor-pointer rounded-md border border-white/40 bg-white px-3 py-1.5 text-sm font-semibold text-[var(--color-primary)]"
           >
             <option value={60}>60×</option>
             <option value={120}>120×</option>

@@ -157,7 +157,8 @@ export default function ReplayPage() {
           <select
             value={speedMultiplier}
             onChange={(e) => setSpeedMultiplier(Number(e.target.value))}
-            className="rounded-xl border border-[var(--color-border)] px-3 py-2.5 text-sm"
+            aria-label="Playback speed"
+            className="cursor-pointer rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2.5 text-sm font-semibold text-[var(--color-ink)]"
           >
             <option value={60}>60×</option>
             <option value={120}>120×</option>
