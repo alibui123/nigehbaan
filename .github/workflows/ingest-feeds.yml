@@ -1,29 +1,51 @@
-name: Ingest feeds (daily)
+name: Vercel cron mirror
 
-# Backup for Vercel cron — fires the same ingest routes GitHub can reach.
+# Hits every path in vercel.json on the same UTC schedules (GitHub backup).
+# Station sim / health also keep their more frequent dedicated workflows.
 on:
   schedule:
+    - cron: '0 0 * * *'
+    - cron: '10 0 * * *'
+    - cron: '20 0 * * *'
+    - cron: '30 0 * * *'
+    - cron: '40 0 * * *'
+    - cron: '50 0 * * *'
+    - cron: '0 1 * * *'
+    - cron: '5 1 * * *'
     - cron: '15 1 * * *'
+    - cron: '20 1 * * *'
   workflow_dispatch:
-  workflow_call:
 
 jobs:
-  ingest:
+  hit:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        path:
-          - /api/ingest/flood-open-meteo
-          - /api/ingest/open-meteo
-          - /api/ingest/usgs
-          - /api/ingest/firms
-          - /api/ingest/pmd-snapshot
-          - /api/ingest/irsa
-          - /api/ingest/drought
-          - /api/ingest/advisories
+        include:
+          - path: /api/ingest/flood-open-meteo
+            schedule: '0 0 * * *'
+          - path: /api/ingest/open-meteo
+            schedule: '10 0 * * *'
+          - path: /api/ingest/usgs
+            schedule: '20 0 * * *'
+          - path: /api/ingest/firms
+            schedule: '30 0 * * *'
+          - path: /api/ingest/pmd-snapshot
+            schedule: '40 0 * * *'
+          - path: /api/ingest/irsa
+            schedule: '50 0 * * *'
+          - path: /api/ingest/drought
+            schedule: '0 1 * * *'
+          - path: /api/ingest/advisories
+            schedule: '5 1 * * *'
+          - path: /api/cron/station-health
+            schedule: '15 1 * * *'
+          - path: /api/simulate/stations
+            schedule: '20 1 * * *'
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == matrix.schedule
     steps:
-      - name: Trigger ${{ matrix.path }}
+      - name: GET ${{ matrix.path }}
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           APP_URL: ${{ secrets.APP_URL }}

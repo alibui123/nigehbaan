@@ -72,10 +72,10 @@ Still useful if Edge Functions are paused or for PMD scrape (PMD often blocks cl
 
 | Workflow | Schedule | Endpoint |
 |---|---|---|
-| Simulate Station Telemetry | ~every 10–60 min | `/api/simulate/stations` |
+| Simulate Station Telemetry | ~every 10 min | `/api/simulate/stations` |
 | Station Health Sweep | ~every 15 min | `/api/cron/station-health` |
 | PMD FFD ingest | 00:40 & 12:40 UTC | scrape → `POST /api/ingest/pmd-snapshot` |
-| Ingest feeds | 01:15 UTC | all `/api/ingest/*` |
+| Vercel cron mirror | same as `vercel.json` | all 10 cron paths (GET) |
 
 Set GitHub secrets `CRON_SECRET` + `APP_URL` to your Render URL.
 
